@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ITVPlayer1.9.8 - Admin Edition</title>
+    <title>ITV Clientes 2.0</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
         body { background-color: #000; color: #fff; font-family: sans-serif; }
-        .navbar { background-color: #111; border-bottom: 1px solid #333; }
+        .navbar { background-color: #111; border-bottom: 1px solid #333; position: relative; }
         .card-cliente { background-color: #1a1a1a; border: 1px solid #333; border-radius: 8px; margin-bottom: 10px; padding: 15px; }
         .btn-small { font-size: 0.7rem; padding: 5px; flex: 1; margin: 2px; border: none; color: white; }
         .bg-lilas { background-color: #9933ff !important; color: white; }
@@ -16,14 +16,17 @@
         .menu-lateral { height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0; background-color: #111; overflow-x: hidden; transition: 0.5s; padding-top: 60px; }
         .menu-lateral a, .menu-lateral label { padding: 8px 32px; text-decoration: none; font-size: 18px; color: #818181; display: block; }
         
-        /* Estilos Novo Painel Administrativo */
+        /* Estilos Painel Administrativo */
         .card-financeiro { background: #222; border-left: 4px solid #9933ff; border-radius: 5px; padding: 15px; margin-bottom: 15px; }
         .stat-val { font-size: 1.5rem; font-weight: bold; color: #00ff00; }
         .stat-label { font-size: 0.8rem; color: #aaa; text-transform: uppercase; }
 
-        /* Nova Tela de Login / Cadastro */
+        /* Tela de Login Direta */
         #authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
         .auth-card { background: #111; border: 1px solid #333; border-radius: 12px; padding: 30px; width: 100%; max-width: 400px; }
+
+        /* Botão + fixado no canto superior direito */
+        .btn-add-fixo { position: absolute; top: 10px; right: 15px; background-color: green; color: white; border: none; z-index: 1030; }
     </style>
 </head>
 <body>
@@ -32,18 +35,9 @@
     <div class="auth-card">
         <div class="text-center mb-4">
             <h3 class="text-white"><i class="bi bi-shield-lock text-success"></i> ITVPlayer</h3>
-            <p class="text-secondary small">Faça login ou crie sua conta para acessar</p>
+            <p class="text-secondary small">Insira suas credenciais para acessar o painel</p>
         </div>
         
-        <ul class="nav nav-pills nav-justified mb-3" id="authTabs">
-            <li class="nav-item">
-                <button class="nav-link active bg-lilas text-white" id="tab-login" onclick="switchAuthTab('login')">Login</button>
-            </li>
-            <li class="nav-item">
-                <button class="nav-link text-white" id="tab-cadastro" onclick="switchAuthTab('cadastro')">Cadastrar</button>
-            </li>
-        </ul>
-
         <div id="formLogin">
             <div class="mb-3">
                 <label class="form-label small text-secondary">E-mail</label>
@@ -53,19 +47,7 @@
                 <label class="form-label small text-secondary">Senha</label>
                 <input type="password" id="loginSenha" class="form-control bg-dark text-white border-secondary" placeholder="******">
             </div>
-            <button class="btn btn-success w-100" onclick="handleLogin()">Entrar no Sistema</button>
-        </div>
-
-        <div id="formCadastro" style="display: none;">
-            <div class="mb-3">
-                <label class="form-label small text-secondary">E-mail para Acesso</label>
-                <input type="email" id="cadEmail" class="form-control bg-dark text-white border-secondary" placeholder="seu@email.com">
-            </div>
-            <div class="mb-3">
-                <label class="form-label small text-secondary">Crie uma Senha</label>
-                <input type="password" id="cadSenha" class="form-control bg-dark text-white border-secondary" placeholder="Mínimo 6 caracteres">
-            </div>
-            <button class="btn btn-primary w-100 bg-lilas border-0" onclick="handleCadastro()">Criar Minha Conta</button>
+            <button class="btn btn-success w-100 bg-lilas border-0" onclick="handleLogin()">Entrar no Sistema</button>
         </div>
     </div>
 </div>
@@ -95,14 +77,21 @@
 </div>
 
 <nav class="navbar sticky-top">
-    <div class="container-fluid">
-        <button class="btn text-white" onclick="openNav()"><i class="bi bi-list fs-3"></i></button>
-        <span class="navbar-brand mb-0 h1 text-white">ITVPlayer1.9.8</span>
-        <div>
+    <div class="container-fluid d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <button class="btn text-white me-2" onclick="openNav()"><i class="bi bi-list fs-3"></i></button>
+            <div class="d-flex flex-column">
+                <span class="navbar-brand mb-0 h1 text-white lh-1">ITV Clientes 2.0</span>
+                <small id="userEmailDisplay" class="text-secondary style" style="font-size: 0.75rem;"></small>
+            </div>
+        </div>
+        <!-- Margem à direita adicionada para o botão gráfico não sobrepor o botão de adicionar -->
+        <div style="margin-right: 50px;">
             <button class="btn btn-outline-info me-2" onclick="toggleAdminPanel()"><i class="bi bi-graph-up"></i></button>
-            <button class="btn text-white" style="background-color: green;" onclick="showModalCadastro()"><i class="bi bi-plus-lg"></i></button>
         </div>
     </div>
+    <!-- Botão posicionado no lado direito superior de forma fixa -->
+    <button class="btn btn-add-fixo" onclick="showModalCadastro()"><i class="bi bi-plus-lg"></i></button>
 </nav>
 
 <div class="container mt-3">
@@ -176,7 +165,6 @@
                 <input type="text" id="cServ" class="form-control mb-2" placeholder="Servidor">
                 <input type="text" id="cUrl" class="form-control mb-2" placeholder="URL">
                 <input type="text" id="cTel" class="form-control mb-2" placeholder="Celular: +55(xx)xxxxx-xxxx">
-                <comment>Certifique-se de preencher o celular corretamente para o botão WhatsApp funcionar</comment>
                 <textarea id="cObs" class="form-control mb-2" placeholder="Observações"></textarea>
                 <button class="btn btn-success w-100" onclick="saveCliente()">Salvar Cliente</button>
             </div>
@@ -191,7 +179,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <script>
-    // Suas configurações fornecidas do Firebase
+    // Configurações fornecidas do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDd_rtYsto9_0zp8pxYwXRs4XRRip7k3uc",
       authDomain: "itvcontrol.firebaseapp.com",
@@ -201,14 +189,14 @@
       appId: "1:291731890067:web:e75e79766765d861db5266"
     };
 
-    // Inicializando instâncias globais do Firebase
+    // Inicializando Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
     let clientes = [];
     let config = { msg: "", p1: "", p2: "", p3: "" };
-    let isUnlocked = localStorage.getItem('itv_unlocked') === 'true';
+    let isUnlocked = true; 
     let currentFilter = 'ativos';
     let usuarioLogadoUid = null;
 
@@ -218,40 +206,16 @@
     auth.onAuthStateChanged(user => {
         if (user) {
             usuarioLogadoUid = user.uid;
+            document.getElementById('userEmailDisplay').innerText = user.email || "";
             document.getElementById('authOverlay').style.display = 'none';
             syncConfigELoadClientes();
         } else {
             usuarioLogadoUid = null;
+            document.getElementById('userEmailDisplay').innerText = "";
             document.getElementById('authOverlay').style.display = 'flex';
             document.getElementById('adminLock').style.display = 'none';
         }
     });
-
-    // Controlar abas Visuais Login / Cadastro
-    function switchAuthTab(tab) {
-        if(tab === 'login') {
-            document.getElementById('tab-login').classList.add('bg-lilas', 'text-white', 'active');
-            document.getElementById('tab-cadastro').classList.remove('bg-lilas', 'text-white', 'active');
-            document.getElementById('formLogin').style.display = 'block';
-            document.getElementById('formCadastro').style.display = 'none';
-        } else {
-            document.getElementById('tab-cadastro').classList.add('bg-lilas', 'text-white', 'active');
-            document.getElementById('tab-login').classList.remove('bg-lilas', 'text-white', 'active');
-            document.getElementById('formLogin').style.display = 'none';
-            document.getElementById('formCadastro').style.display = 'block';
-        }
-    }
-
-    // Ações de Autenticação com o Firebase
-    function handleCadastro() {
-        const email = document.getElementById('cadEmail').value.trim();
-        const senha = document.getElementById('cadSenha').value.trim();
-        if(!email || !senha) return alert("Preencha todos os campos!");
-
-        auth.createUserWithEmailAndPassword(email, senha)
-            .then(() => alert("Conta criada e logada com sucesso!"))
-            .catch(err => alert("Erro ao cadastrar: " + err.message));
-    }
 
     function handleLogin() {
         const email = document.getElementById('loginEmail').value.trim();
@@ -272,7 +236,6 @@
     function syncConfigELoadClientes() {
         if(!usuarioLogadoUid) return;
 
-        // Escuta as configurações da nuvem
         db.collection("usuarios").doc(usuarioLogadoUid).collection("config").doc("geral")
         .onSnapshot(doc => {
             if(doc.exists) {
@@ -284,7 +247,6 @@
             }
         });
 
-        // Escuta os clientes da nuvem em tempo real
         db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes")
         .onSnapshot(snapshot => {
             clientes = [];
@@ -297,11 +259,7 @@
     }
 
     function checkLock() {
-        if (!isUnlocked && clientes.filter(c => c.status !== 'deletado').length >= 4) {
-            document.getElementById('adminLock').style.display = 'flex';
-        } else {
-            document.getElementById('adminLock').style.display = 'none';
-        }
+        document.getElementById('adminLock').style.display = 'none';
     }
 
     function toggleAdminPanel() {
@@ -311,11 +269,9 @@
     }
 
     function unlockApp() {
-        if (document.getElementById('adminPass').value === 'itv2026001') {
-            isUnlocked = true;
-            localStorage.setItem('itv_unlocked', 'true');
-            document.getElementById('adminLock').style.display = 'none';
-        } else { alert("Senha incorreta!"); }
+        isUnlocked = true;
+        localStorage.setItem('itv_unlocked', 'true');
+        document.getElementById('adminLock').style.display = 'none';
     }
 
     function openNav() { document.getElementById("mySidenav").style.width = "250px"; }
@@ -382,31 +338,31 @@
 
     function renderFinanceiro() {
         const mesSelecionado = document.getElementById('filterMes').value; 
-        let recebido = 0;
-        let pendente = 0;
-        let totalGeral = 0;
-        let totalAtivos = 0;
+        let received = 0;
+        let pending = 0;
+        let totalGeneral = 0;
+        let totalActive = 0;
 
         clientes.forEach(c => {
             if(c.status !== 'deletado') {
                 const val = parseFloat(c.valor) || 0;
-                totalGeral += val;
-                totalAtivos++;
+                totalGeneral += val;
+                totalActive++;
                 
                 if(c.data && c.data.startsWith(mesSelecionado)) {
                     if(c.status === 'ativo' || c.status === 'vencer' || c.status === 'expirado') {
-                        recebido += val;
+                        received += val;
                     } else if(c.status === 'apagar') {
-                        pendente += val;
+                        pending += val;
                     }
                 }
             }
         });
 
-        document.getElementById('finRecebido').innerText = `R$ ${recebido.toFixed(2)}`;
-        document.getElementById('finPendente').innerText = `R$ ${pendente.toFixed(2)}`;
-        document.getElementById('finTotalClientes').innerText = totalAtivos;
-        document.getElementById('finGeral').innerText = `R$ ${totalGeral.toFixed(2)}`;
+        document.getElementById('finRecebido').innerText = `R$ ${received.toFixed(2)}`;
+        document.getElementById('finPendente').innerText = `R$ ${pending.toFixed(2)}`;
+        document.getElementById('finTotalClientes').innerText = totalActive;
+        document.getElementById('finGeral').innerText = `R$ ${totalGeneral.toFixed(2)}`;
     }
 
     function openWhatsApp(id) {
