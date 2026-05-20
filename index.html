@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITVPlayer1.9.8 - Admin Edition</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #000; color: #fff; font-family: sans-serif; }
+        .navbar { background-color: #111; border-bottom: 1px solid #333; }
+        .card-cliente { background-color: #1a1a1a; border: 1px solid #333; border-radius: 8px; margin-bottom: 10px; padding: 15px; }
+        .btn-small { font-size: 0.7rem; padding: 5px; flex: 1; margin: 2px; border: none; color: white; }
+        .bg-lilas { background-color: #9933ff !important; color: white; }
+        #adminLock { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .menu-lateral { height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0; background-color: #111; overflow-x: hidden; transition: 0.5s; padding-top: 60px; }
+        .menu-lateral a, .menu-lateral label { padding: 8px 32px; text-decoration: none; font-size: 18px; color: #818181; display: block; }
+        
+        /* Estilos Novo Painel Administrativo */
+        .card-financeiro { background: #222; border-left: 4px solid #9933ff; border-radius: 5px; padding: 15px; margin-bottom: 15px; }
+        .stat-val { font-size: 1.5rem; font-weight: bold; color: #00ff00; }
+        .stat-label { font-size: 0.8rem; color: #aaa; text-transform: uppercase; }
+
+        /* Nova Tela de Login / Cadastro */
+        #authOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: flex; align-items: center; justify-content: center; }
+        .auth-card { background: #111; border: 1px solid #333; border-radius: 12px; padding: 30px; width: 100%; max-width: 400px; }
+    </style>
+</head>
+<body>
+
+<div id="authOverlay">
+    <div class="auth-card">
+        <div class="text-center mb-4">
+            <h3 class="text-white"><i class="bi bi-shield-lock text-success"></i> ITVPlayer</h3>
+            <p class="text-secondary small">Faça login ou crie sua conta para acessar</p>
+        </div>
+        
+        <ul class="nav nav-pills nav-justified mb-3" id="authTabs">
+            <li class="nav-item">
+                <button class="nav-link active bg-lilas text-white" id="tab-login" onclick="switchAuthTab('login')">Login</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link text-white" id="tab-cadastro" onclick="switchAuthTab('cadastro')">Cadastrar</button>
+            </li>
+        </ul>
+
+        <div id="formLogin">
+            <div class="mb-3">
+                <label class="form-label small text-secondary">E-mail</label>
+                <input type="email" id="loginEmail" class="form-control bg-dark text-white border-secondary" placeholder="seu@email.com">
+            </div>
+            <div class="mb-3">
+                <label class="form-label small text-secondary">Senha</label>
+                <input type="password" id="loginSenha" class="form-control bg-dark text-white border-secondary" placeholder="******">
+            </div>
+            <button class="btn btn-success w-100" onclick="handleLogin()">Entrar no Sistema</button>
+        </div>
+
+        <div id="formCadastro" style="display: none;">
+            <div class="mb-3">
+                <label class="form-label small text-secondary">E-mail para Acesso</label>
+                <input type="email" id="cadEmail" class="form-control bg-dark text-white border-secondary" placeholder="seu@email.com">
+            </div>
+            <div class="mb-3">
+                <label class="form-label small text-secondary">Crie uma Senha</label>
+                <input type="password" id="cadSenha" class="form-control bg-dark text-white border-secondary" placeholder="Mínimo 6 caracteres">
+            </div>
+            <button class="btn btn-primary w-100 bg-lilas border-0" onclick="handleCadastro()">Criar Minha Conta</button>
+        </div>
+    </div>
+</div>
+
+<div id="adminLock">
+    <h2>Entre em contato com o ADM</h2>
+    <p>Aplicativo Bloqueado</p>
+    <button class="btn btn-success mb-3" onclick="window.open('https://wa.me/5585996498573')"><i class="bi bi-whatsapp"></i> WhatsApp ADM</button>
+    <input type="password" id="adminPass" class="form-control w-50 mb-2" placeholder="Senha">
+    <button class="btn btn-primary" onclick="unlockApp()">Desbloquear</button>
+</div>
+
+<div id="mySidenav" class="menu-lateral">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <div class="p-3">
+        <label>Msg Cobrança:</label>
+        <textarea id="cfgMsg" class="form-control mb-2"></textarea>
+        <label>Painel 1 (CENTRAL):</label>
+        <input type="text" id="url1" class="form-control mb-2">
+        <label>Painel 2 (WAREZ):</label>
+        <input type="text" id="url2" class="form-control mb-2">
+        <label>Painel 3 (ZEUS):</label>
+        <input type="text" id="url3" class="form-control mb-2">
+        <button class="btn btn-info w-100 mt-3" onclick="saveSettings()">Salvar Configurações</button>
+        <button class="btn btn-danger w-100 mt-5" onclick="handleLogout()">Sair da Conta</button>
+    </div>
+</div>
+
+<nav class="navbar sticky-top">
+    <div class="container-fluid">
+        <button class="btn text-white" onclick="openNav()"><i class="bi bi-list fs-3"></i></button>
+        <span class="navbar-brand mb-0 h1 text-white">ITVPlayer1.9.8</span>
+        <div>
+            <button class="btn btn-outline-info me-2" onclick="toggleAdminPanel()"><i class="bi bi-graph-up"></i></button>
+            <button class="btn text-white" style="background-color: green;" onclick="showModalCadastro()"><i class="bi bi-plus-lg"></i></button>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-3">
+    
+    <div id="adminPanel" style="display: none;" class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4><i class="bi bi-cash-stack text-success"></i> Gestão Financeira</h4>
+            <input type="month" id="filterMes" class="form-control w-auto bg-dark text-white border-secondary" onchange="renderFinanceiro()">
+        </div>
+        <div class="row g-2">
+            <div class="col-6 col-md-3">
+                <div class="card-financeiro">
+                    <div class="stat-label">Recebido (Mês)</div>
+                    <div class="stat-val" id="finRecebido">R$ 0,00</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card-financeiro" style="border-left-color: #ffc107;">
+                    <div class="stat-label">A Receber</div>
+                    <div class="stat-val text-warning" id="finPendente">R$ 0,00</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card-financeiro" style="border-left-color: #0dcaf0;">
+                    <div class="stat-label">Total Clientes</div>
+                    <div class="stat-val text-info" id="finTotalClientes">0</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card-financeiro" style="border-left-color: #00ff00;">
+                    <div class="stat-label">Lucro Geral</div>
+                    <div class="stat-val" id="finGeral" style="color: #00ff00;">R$ 0,00</div>
+                </div>
+            </div>
+        </div>
+        <hr class="border-secondary">
+    </div>
+
+    <input type="text" id="search" class="form-control bg-dark text-white border-secondary mb-3" placeholder="Buscar cliente..." onkeyup="renderClientes()">
+
+    <div class="d-flex mb-3">
+        <button class="btn-small bg-primary" onclick="filterData('ativos')">ATIVOS (<span id="countAtivos">0</span>)</button>
+        <button class="btn-small" style="background-color: orange;" onclick="filterData('vencer')">A VENCER (<span id="countVencer">0</span>)</button>
+        <button class="btn-small bg-danger" onclick="filterData('expirados')">EXPIRADOS (<span id="countExp">0</span>)</button>
+        <button class="btn-small bg-info" onclick="filterData('apagar')">A PAGAR (<span id="countPagar">0</span>)</button>
+        <button class="btn-small bg-secondary" onclick="filterData('deletados')">LIXO (<span id="countDel">0</span>)</button>
+    </div>
+
+    <div class="d-flex gap-2 mb-4">
+        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(1)">CENTRAL</button>
+        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(2)">WAREZ</button>
+        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(3)">ZEUS</button>
+    </div>
+
+    <div id="listaClientes"></div>
+</div>
+
+<div class="modal fade" id="modalCadastro" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-body">
+                <input type="hidden" id="editId">
+                <label class="small text-secondary">Nome do Cliente:</label>
+                <input type="text" id="cNome" class="form-control mb-2" placeholder="Nome">
+                <input type="text" id="cUser" class="form-control mb-2" placeholder="Usuário">
+                <input type="text" id="cPass" class="form-control mb-2" placeholder="Senha">
+                <label class="small text-secondary">Valor da Mensalidade:</label>
+                <input type="number" id="cValor" class="form-control mb-2" placeholder="Valor">
+                <label class="small text-secondary">Data de Vencimento:</label>
+                <input type="date" id="cData" class="form-control mb-2">
+                <input type="text" id="cServ" class="form-control mb-2" placeholder="Servidor">
+                <input type="text" id="cUrl" class="form-control mb-2" placeholder="URL">
+                <input type="text" id="cTel" class="form-control mb-2" placeholder="Celular: +55(xx)xxxxx-xxxx">
+                <comment>Certifique-se de preencher o celular corretamente para o botão WhatsApp funcionar</comment>
+                <textarea id="cObs" class="form-control mb-2" placeholder="Observações"></textarea>
+                <button class="btn btn-success w-100" onclick="saveCliente()">Salvar Cliente</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<script>
+    // Suas configurações fornecidas do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDd_rtYsto9_0zp8pxYwXRs4XRRip7k3uc",
+      authDomain: "itvcontrol.firebaseapp.com",
+      projectId: "itvcontrol",
+      storageBucket: "itvcontrol.firebasestorage.app",
+      messagingSenderId: "291731890067",
+      appId: "1:291731890067:web:e75e79766765d861db5266"
+    };
+
+    // Inicializando instâncias globais do Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let clientes = [];
+    let config = { msg: "", p1: "", p2: "", p3: "" };
+    let isUnlocked = localStorage.getItem('itv_unlocked') === 'true';
+    let currentFilter = 'ativos';
+    let usuarioLogadoUid = null;
+
+    document.getElementById('filterMes').value = new Date().toISOString().slice(0, 7);
+
+    // Monitoramento do Estado de Login em Tempo Real
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            usuarioLogadoUid = user.uid;
+            document.getElementById('authOverlay').style.display = 'none';
+            syncConfigELoadClientes();
+        } else {
+            usuarioLogadoUid = null;
+            document.getElementById('authOverlay').style.display = 'flex';
+            document.getElementById('adminLock').style.display = 'none';
+        }
+    });
+
+    // Controlar abas Visuais Login / Cadastro
+    function switchAuthTab(tab) {
+        if(tab === 'login') {
+            document.getElementById('tab-login').classList.add('bg-lilas', 'text-white', 'active');
+            document.getElementById('tab-cadastro').classList.remove('bg-lilas', 'text-white', 'active');
+            document.getElementById('formLogin').style.display = 'block';
+            document.getElementById('formCadastro').style.display = 'none';
+        } else {
+            document.getElementById('tab-cadastro').classList.add('bg-lilas', 'text-white', 'active');
+            document.getElementById('tab-login').classList.remove('bg-lilas', 'text-white', 'active');
+            document.getElementById('formLogin').style.display = 'none';
+            document.getElementById('formCadastro').style.display = 'block';
+        }
+    }
+
+    // Ações de Autenticação com o Firebase
+    function handleCadastro() {
+        const email = document.getElementById('cadEmail').value.trim();
+        const senha = document.getElementById('cadSenha').value.trim();
+        if(!email || !senha) return alert("Preencha todos os campos!");
+
+        auth.createUserWithEmailAndPassword(email, senha)
+            .then(() => alert("Conta criada e logada com sucesso!"))
+            .catch(err => alert("Erro ao cadastrar: " + err.message));
+    }
+
+    function handleLogin() {
+        const email = document.getElementById('loginEmail').value.trim();
+        const senha = document.getElementById('loginSenha').value.trim();
+        if(!email || !senha) return alert("Preencha todos os campos!");
+
+        auth.signInWithEmailAndPassword(email, senha)
+            .catch(err => alert("Erro ao entrar: " + err.message));
+    }
+
+    function handleLogout() {
+        auth.signOut().then(() => {
+            closeNav();
+        });
+    }
+
+    // Carregamento de Configurações e Clientes Baseados no Usuário Logado
+    function syncConfigELoadClientes() {
+        if(!usuarioLogadoUid) return;
+
+        // Escuta as configurações da nuvem
+        db.collection("usuarios").doc(usuarioLogadoUid).collection("config").doc("geral")
+        .onSnapshot(doc => {
+            if(doc.exists) {
+                config = doc.data();
+                document.getElementById('cfgMsg').value = config.msg || "";
+                document.getElementById('url1').value = config.p1 || "";
+                document.getElementById('url2').value = config.p2 || "";
+                document.getElementById('url3').value = config.p3 || "";
+            }
+        });
+
+        // Escuta os clientes da nuvem em tempo real
+        db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes")
+        .onSnapshot(snapshot => {
+            clientes = [];
+            snapshot.forEach(doc => {
+                clientes.push({ id: doc.id, ...doc.data() });
+            });
+            checkLock();
+            renderClientes();
+        });
+    }
+
+    function checkLock() {
+        if (!isUnlocked && clientes.filter(c => c.status !== 'deletado').length >= 4) {
+            document.getElementById('adminLock').style.display = 'flex';
+        } else {
+            document.getElementById('adminLock').style.display = 'none';
+        }
+    }
+
+    function toggleAdminPanel() {
+        const panel = document.getElementById('adminPanel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        if(panel.style.display === 'block') renderFinanceiro();
+    }
+
+    function unlockApp() {
+        if (document.getElementById('adminPass').value === 'itv2026001') {
+            isUnlocked = true;
+            localStorage.setItem('itv_unlocked', 'true');
+            document.getElementById('adminLock').style.display = 'none';
+        } else { alert("Senha incorreta!"); }
+    }
+
+    function openNav() { document.getElementById("mySidenav").style.width = "250px"; }
+    function closeNav() { document.getElementById("mySidenav").style.width = "0"; }
+
+    function saveSettings() {
+        if(!usuarioLogadoUid) return;
+        config = {
+            msg: document.getElementById('cfgMsg').value,
+            p1: document.getElementById('url1').value,
+            p2: document.getElementById('url2').value,
+            p3: document.getElementById('url3').value
+        };
+        db.collection("usuarios").doc(usuarioLogadoUid).collection("config").doc("geral").set(config)
+            .then(() => closeNav())
+            .catch(err => alert("Erro ao salvar: " + err.message));
+    }
+
+    function showModalCadastro(id = "") {
+        if(id === "") {
+            document.getElementById('editId').value = "";
+            document.getElementById('cNome').value = "";
+            document.getElementById('cUser').value = "";
+            document.getElementById('cPass').value = "";
+            document.getElementById('cValor').value = "";
+            document.getElementById('cData').value = "";
+            document.getElementById('cServ').value = "";
+            document.getElementById('cUrl').value = "";
+            document.getElementById('cTel').value = "";
+            document.getElementById('cObs').value = "";
+        }
+        new bootstrap.Modal(document.getElementById('modalCadastro')).show();
+    }
+
+    function saveCliente() {
+        if(!usuarioLogadoUid) return;
+        const id = document.getElementById('editId').value;
+        const novo = {
+            nome: document.getElementById('cNome').value,
+            user: document.getElementById('cUser').value,
+            pass: document.getElementById('cPass').value,
+            valor: parseFloat(document.getElementById('cValor').value) || 0,
+            data: document.getElementById('cData').value,
+            serv: document.getElementById('cServ').value,
+            url: document.getElementById('cUrl').value,
+            tel: document.getElementById('cTel').value,
+            obs: document.getElementById('cObs').value,
+            status: 'ativo'
+        };
+
+        const modalEl = document.getElementById('modalCadastro');
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+
+        if(id === "") {
+            db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").add(novo)
+                .then(() => modalInstance.hide());
+        } else {
+            const index = clientes.findIndex(c => c.id === id);
+            novo.status = clientes[index].status;
+            db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).set(novo)
+                .then(() => modalInstance.hide());
+        }
+    }
+
+    function renderFinanceiro() {
+        const mesSelecionado = document.getElementById('filterMes').value; 
+        let recebido = 0;
+        let pendente = 0;
+        let totalGeral = 0;
+        let totalAtivos = 0;
+
+        clientes.forEach(c => {
+            if(c.status !== 'deletado') {
+                const val = parseFloat(c.valor) || 0;
+                totalGeral += val;
+                totalAtivos++;
+                
+                if(c.data && c.data.startsWith(mesSelecionado)) {
+                    if(c.status === 'ativo' || c.status === 'vencer' || c.status === 'expirado') {
+                        recebido += val;
+                    } else if(c.status === 'apagar') {
+                        pendente += val;
+                    }
+                }
+            }
+        });
+
+        document.getElementById('finRecebido').innerText = `R$ ${recebido.toFixed(2)}`;
+        document.getElementById('finPendente').innerText = `R$ ${pendente.toFixed(2)}`;
+        document.getElementById('finTotalClientes').innerText = totalAtivos;
+        document.getElementById('finGeral').innerText = `R$ ${totalGeral.toFixed(2)}`;
+    }
+
+    function openWhatsApp(id) {
+        const c = clientes.find(item => item.id === id);
+        if(c && c.tel) {
+            const num = c.tel.replace(/\D/g,'');
+            window.open(`https://wa.me/${num}`);
+        } else {
+            alert("Número de telefone não cadastrado!");
+        }
+    }
+
+    function renderClientes() {
+        const lista = document.getElementById('listaClientes');
+        const search = document.getElementById('search').value.toLowerCase();
+        lista.innerHTML = "";
+        
+        let counts = { ativos: 0, vencer: 0, exp: 0, apagar: 0, del: 0 };
+        const hoje = new Date();
+
+        clientes.forEach((c) => {
+            const dataVenc = new Date(c.data);
+            const diffDays = Math.ceil((dataVenc - hoje) / (1000 * 60 * 60 * 24));
+            
+            let statusReal = c.status;
+            if(c.status !== 'deletado' && c.status !== 'apagar') {
+                if(diffDays < 0) statusReal = 'expirado';
+                else if(diffDays <= 3) statusReal = 'vencer';
+                else statusReal = 'ativo';
+            }
+
+            if(statusReal === 'ativo') counts.ativos++;
+            if(statusReal === 'vencer') counts.vencer++;
+            if(statusReal === 'expirado') counts.exp++;
+            if(c.status === 'apagar') counts.apagar++;
+            if(c.status === 'deletado') counts.del++;
+
+            if(currentFilter === 'ativos' && (statusReal === 'deletado' || statusReal === 'expirado' || statusReal === 'apagar')) return;
+            if(currentFilter === 'vencer' && statusReal !== 'vencer') return;
+            if(currentFilter === 'expirados' && statusReal !== 'expirado') return;
+            if(currentFilter === 'apagar' && c.status !== 'apagar') return;
+            if(currentFilter === 'deletados' && c.status !== 'deletado') return;
+            
+            if(!c.nome.toLowerCase().includes(search)) return;
+
+            lista.innerHTML += `
+                <div class="card-cliente">
+                    <div class="d-flex justify-content-between">
+                        <h5>${c.nome}</h5>
+                        <span class="badge ${statusReal === 'expirado' ? 'bg-danger' : (statusReal === 'vencer' ? 'bg-warning' : 'bg-success')}">${c.data}</span>
+                    </div>
+                    <p class="small mb-2">User: ${c.user} | Valor: <strong>R$${c.valor}</strong></p>
+                    <div class="d-flex flex-wrap gap-1">
+                        <button class="btn btn-sm btn-success" onclick="sendZap('${c.id}', 'cobranca')">COBRAR</button>
+                        <button class="btn btn-sm btn-primary" onclick="updateStatus('${c.id}', 'pago')">PAGO</button>
+                        <button class="btn btn-sm btn-warning" onclick="updateStatus('${c.id}', 'naopago')">NÃO PAGO</button>
+                        <button class="btn btn-sm" style="background-color: #25D366; color: white;" onclick="openWhatsApp('${c.id}')"><i class="bi bi-whatsapp"></i></button>
+                        <button class="btn btn-sm bg-lilas" onclick="editCliente('${c.id}')"><i class="bi bi-pencil"></i></button>
+                        ${c.status === 'deletado' ? 
+                            `<button class="btn btn-sm btn-info" onclick="restore('${c.id}')">RESTAURAR</button>
+                             <button class="btn btn-sm btn-danger" onclick="hardDelete('${c.id}')">EXCLUIR</button>` : 
+                            `<button class="btn btn-sm btn-danger" onclick="softDelete('${c.id}')"><i class="bi bi-trash"></i></button>`
+                        }
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('countAtivos').innerText = counts.ativos;
+        document.getElementById('countVencer').innerText = counts.vencer;
+        document.getElementById('countExp').innerText = counts.exp;
+        document.getElementById('countPagar').innerText = counts.apagar;
+        document.getElementById('countDel').innerText = counts.del;
+        renderFinanceiro();
+    }
+
+    function sendZap(id, tipo) {
+        const c = clientes.find(item => item.id === id);
+        if(!c) return;
+        let msg = "";
+        const novaData = new Date();
+        novaData.setMonth(novaData.getMonth() + 1);
+        const dataFormat = novaData.toLocaleDateString('pt-BR');
+
+        if(tipo === 'cobranca') {
+            msg = `📩 𝕞𝕤𝕘-𝕒𝕦𝕥𝕠𝕞á𝕥𝕚𝕔𝕒📩\n🚨🚨🚨🚨🚨🚨🚨🚨\n\nOla ${c.nome}!!\nSou o assistente virtual da ITVplayer 🤖\n\nSua lista de\nTV, FILMES & SÉRIES\nexpirou ${c.data}\n\nPara renovar Faz um Pix 💠\n💰Plano Familia: R$:${c.valor}\n${config.msg || ""}`;
+        } else if(tipo === 'pago') {
+            msg = `✅𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆𝕊!!\n\nNome: ${c.nome}\nPlano Familia: ${c.valor}\nProvedor: ${c.serv}\nUsuário: ${c.user}\nSenha: ${c.pass}\nUrl: ${c.url}\nVence: ${dataFormat}\n\nDivirta-se!!`;
+        } else {
+            msg = `⛔️𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 ℕ𝔸𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆𝕊!!\n\nNome: ${c.nome}\nPlano Familia: ${c.valor}\nProvedor: ${c.serv}\nUsuário: ${c.user}\nSenha: ${c.pass}\nUrl: ${c.url}\nVence: ${dataFormat}\n\nDivirta-se!!`;
+        }
+        
+        window.open(`https://wa.me/${c.tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
+    }
+
+    function updateStatus(id, acao) {
+        if(!usuarioLogadoUid) return;
+        const index = clientes.findIndex(item => item.id === id);
+        if(index === -1) return;
+
+        const dataAtual = new Date(clientes[index].data);
+        dataAtual.setMonth(dataAtual.getMonth() + 1);
+        const novaDataStr = dataAtual.toISOString().split('T')[0];
+        
+        let novoStatus = acao === 'pago' ? 'ativo' : 'apagar';
+        
+        db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).update({
+            data: novaDataStr,
+            status: novoStatus
+        }).then(() => {
+            sendZap(id, acao);
+        });
+    }
+
+    function filterData(f) { currentFilter = f; renderClientes(); }
+    
+    function softDelete(id) { 
+        if(!usuarioLogadoUid) return;
+        db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).update({ status: 'deletado' }); 
+    }
+    function restore(id) { 
+        if(!usuarioLogadoUid) return;
+        db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).update({ status: 'ativo' }); 
+    }
+    function hardDelete(id) { 
+        if(!usuarioLogadoUid) return;
+        if(confirm("Excluir permanentemente do Firebase?")) { 
+            db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).delete();
+        } 
+    }
+    
+    function accessPanel(n) { const url = config['p'+n]; if(url) window.open(url); else alert("Cadastre a URL no menu lateral"); }
+
+    function editCliente(id) {
+        const c = clientes.find(item => item.id === id);
+        if(!c) return;
+        document.getElementById('editId').value = c.id;
+        document.getElementById('cNome').value = c.nome;
+        document.getElementById('cUser').value = c.user;
+        document.getElementById('cPass').value = c.pass;
+        document.getElementById('cValor').value = c.valor;
+        document.getElementById('cData').value = c.data;
+        document.getElementById('cServ').value = c.serv;
+        document.getElementById('cUrl').value = c.url;
+        document.getElementById('cTel').value = c.tel;
+        document.getElementById('cObs').value = c.obs;
+        new bootstrap.Modal(document.getElementById('modalCadastro')).show();
+    }
+</script>
+</body>
+</html>
