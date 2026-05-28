@@ -27,6 +27,12 @@
 
         /* Botão + fixado no canto superior direito */
         .btn-add-fixo { position: absolute; top: 10px; right: 15px; background-color: green; color: white; border: none; z-index: 1030; }
+        
+        /* Estilos para botões de renovação */
+        .renew-toggle-btn { min-width: 85px; }
+        .renew-action-btn { min-width: 85px; flex: 1; }
+        .renew-options { display: none; gap: 4px; margin-left: 4px; }
+        .renew-options.show { display: flex !important; }
     </style>
 </head>
 <body>
@@ -41,8 +47,7 @@
         <div id="formLogin">
             <div class="mb-3">
                 <label class="form-label small text-secondary">E-mail</label>
-                <input type="email" id="loginEmail" class="form-control bg-dark text-white border-secondary" placeholder="seu@email.com">
-            </div>
+                <input type="email" id="loginEmail" class="form-control bg-dark text-white border-secondary" placeholder="seu@email.com">            </div>
             <div class="mb-3">
                 <label class="form-label small text-secondary">Senha</label>
                 <input type="password" id="loginSenha" class="form-control bg-dark text-white border-secondary" placeholder="******">
@@ -91,8 +96,7 @@
         </div>
     </div>
     <!-- Botão posicionado no lado direito superior de forma fixa -->
-    <button class="btn btn-add-fixo" onclick="showModalCadastro()"><i class="bi bi-plus-lg"></i></button>
-</nav>
+    <button class="btn btn-add-fixo" onclick="showModalCadastro()"><i class="bi bi-plus-lg"></i></button></nav>
 
 <div class="container mt-3">
     
@@ -141,8 +145,7 @@
     </div>
 
     <div class="d-flex gap-2 mb-4">
-        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(1)">CENTRAL</button>
-        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(2)">WAREZ</button>
+        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(1)">CENTRAL</button>        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(2)">WAREZ</button>
         <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(3)">ZEUS</button>
     </div>
 
@@ -159,7 +162,7 @@
                 <input type="text" id="cUser" class="form-control mb-2" placeholder="Usuário">
                 <input type="text" id="cPass" class="form-control mb-2" placeholder="Senha">
                 <label class="small text-secondary">Valor da Mensalidade:</label>
-                <input type="number" id="cValor" class="form-control mb-2" placeholder="Valor">
+                <input type="number" id="cValor" class="form-control mb-2" placeholder="00,00" step="0.01">
                 <label class="small text-secondary">Data de Vencimento:</label>
                 <input type="date" id="cData" class="form-control mb-2">
                 <input type="text" id="cServ" class="form-control mb-2" placeholder="Servidor">
@@ -191,8 +194,7 @@
 
     // Inicializando Firebase
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    const auth = firebase.auth();    const db = firebase.firestore();
 
     let clientes = [];
     let config = { msg: "", p1: "", p2: "", p3: "" };
@@ -201,6 +203,47 @@
     let usuarioLogadoUid = null;
 
     document.getElementById('filterMes').value = new Date().toISOString().slice(0, 7);
+
+    // ============================================
+    // === FUNÇÃO UTILITÁRIA: FORMATAR MOEDA BR ===
+    // ============================================
+    function formatCurrencyBR(value) {
+        if (value === null || value === undefined || value === '') return 'R$ 0,00';
+        const num = parseFloat(value);
+        if (isNaN(num)) return 'R$ 0,00';
+        return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    // Formata data para padrão brasileiro DD/MM/AAAA
+    function formatDateBR(dateString) {
+        if (!dateString) return '';
+        let parts;
+        if (dateString instanceof Date) {
+            const d = dateString;
+            return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+        }
+        if (dateString.includes('-')) {
+            parts = dateString.split('-');
+        } else if (dateString.includes('/')) {
+            parts = dateString.split('/');
+        } else {
+            return dateString;
+        }
+        if (parts.length === 3) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        return dateString;
+    }
+
+    // Converte data BR para ISO (uso interno no Firebase)
+    function parseDateBRtoISO(dateBR) {
+        if (!dateBR) return '';
+        const parts = dateBR.split('/');
+        if (parts.length === 3) {
+            return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        }
+        return dateBR;
+    }    // ============================================
 
     // Monitoramento do Estado de Login em Tempo Real
     auth.onAuthStateChanged(user => {
@@ -249,8 +292,7 @@
 
         db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes")
         .onSnapshot(snapshot => {
-            clientes = [];
-            snapshot.forEach(doc => {
+            clientes = [];            snapshot.forEach(doc => {
                 clientes.push({ id: doc.id, ...doc.data() });
             });
             checkLock();
@@ -299,9 +341,22 @@
             document.getElementById('cValor').value = "";
             document.getElementById('cData').value = "";
             document.getElementById('cServ').value = "";
-            document.getElementById('cUrl').value = "";
-            document.getElementById('cTel').value = "";
+            document.getElementById('cUrl').value = "";            document.getElementById('cTel').value = "";
             document.getElementById('cObs').value = "";
+        } else {
+            const c = clientes.find(item => item.id === id);
+            if(c) {
+                document.getElementById('editId').value = c.id;
+                document.getElementById('cNome').value = c.nome || "";
+                document.getElementById('cUser').value = c.user || "";
+                document.getElementById('cPass').value = c.pass || "";
+                document.getElementById('cValor').value = c.valor !== undefined ? c.valor : "";
+                document.getElementById('cData').value = c.data || "";
+                document.getElementById('cServ').value = c.serv || "";
+                document.getElementById('cUrl').value = c.url || "";
+                document.getElementById('cTel').value = c.tel || "";
+                document.getElementById('cObs').value = c.obs || "";
+            }
         }
         new bootstrap.Modal(document.getElementById('modalCadastro')).show();
     }
@@ -309,11 +364,15 @@
     function saveCliente() {
         if(!usuarioLogadoUid) return;
         const id = document.getElementById('editId').value;
+        const valorRaw = document.getElementById('cValor').value;
+        // Converte valor para número (aceita vírgula ou ponto)
+        const valorNum = parseFloat(valorRaw.replace(',', '.')) || 0;
+        
         const novo = {
             nome: document.getElementById('cNome').value,
             user: document.getElementById('cUser').value,
             pass: document.getElementById('cPass').value,
-            valor: parseFloat(document.getElementById('cValor').value) || 0,
+            valor: valorNum,
             data: document.getElementById('cData').value,
             serv: document.getElementById('cServ').value,
             url: document.getElementById('cUrl').value,
@@ -331,8 +390,7 @@
         } else {
             const index = clientes.findIndex(c => c.id === id);
             novo.status = clientes[index].status;
-            db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).set(novo)
-                .then(() => modalInstance.hide());
+            db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).set(novo)                .then(() => modalInstance.hide());
         }
     }
 
@@ -359,10 +417,10 @@
             }
         });
 
-        document.getElementById('finRecebido').innerText = `R$ ${received.toFixed(2)}`;
-        document.getElementById('finPendente').innerText = `R$ ${pending.toFixed(2)}`;
+        document.getElementById('finRecebido').innerText = formatCurrencyBR(received);
+        document.getElementById('finPendente').innerText = formatCurrencyBR(pending);
         document.getElementById('finTotalClientes').innerText = totalActive;
-        document.getElementById('finGeral').innerText = `R$ ${totalGeneral.toFixed(2)}`;
+        document.getElementById('finGeral').innerText = formatCurrencyBR(totalGeneral);
     }
 
     function openWhatsApp(id) {
@@ -374,6 +432,65 @@
             alert("Número de telefone não cadastrado!");
         }
     }
+
+    // === FUNÇÕES PARA RENOVAÇÃO ===
+    function toggleRenewButtons(id) {
+        const opts = document.getElementById(`renewOpts-${id}`);
+        if(opts) {
+            opts.classList.toggle('show');
+        }
+    }
+    function handleRenewal(id, tipo) {
+        if(!usuarioLogadoUid) return;
+        const index = clientes.findIndex(item => item.id === id);
+        if(index === -1) return;
+
+        const dataAtual = new Date(clientes[index].data);
+        dataAtual.setMonth(dataAtual.getMonth() + 1);
+        const novaDataStr = dataAtual.toISOString().split('T')[0];
+        
+        let novoStatus = tipo === 'renovar' ? 'ativo' : 'apagar';
+        
+        db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).update({
+            data: novaDataStr,
+            status: novoStatus
+        }).then(() => {
+            sendRenewalMessage(id, tipo);
+        });
+    }
+
+    function handlePagoApenas(id) {
+        if(!usuarioLogadoUid) return;
+        db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).update({
+            status: 'ativo'
+        }).then(() => {
+            sendRenewalMessage(id, 'pago');
+        });
+    }
+
+    function sendRenewalMessage(id, tipo) {
+        const c = clientes.find(item => item.id === id);
+        if(!c) return;
+        
+        const novaData = new Date();
+        novaData.setMonth(novaData.getMonth() + 1);
+        const dataFormat = novaData.toLocaleDateString('pt-BR');
+        
+        let msg = "";
+        
+        if(tipo === 'renovar' || tipo === 'pago') {
+            msg = `✅ *PAGAMENTO CONFIRMADO!*\n\nNome: ${c.nome}\nPlano: ${formatCurrencyBR(c.valor)}\nProvedor: ${c.serv}\nUsuário: ${c.user}\nSenha: ${c.pass}\nUrl: ${c.url}\nPróximo vencimento: ${dataFormat}\n\nDivirta-se!`;
+        } else if(tipo === 'aReceber') {
+            msg = `⛔️ *PAGAMENTO NÃO CONFIRMADO!*\n\nNome: ${c.nome}\nPlano: ${formatCurrencyBR(c.valor)}\nProvedor: ${c.serv}\nUsuário: ${c.user}\nSenha: ${c.pass}\nUrl: ${c.url}\nVence: ${formatDateBR(c.data)}\n\nEntre em contato para regularizar!`;
+        }
+        
+        const num = c.tel ? c.tel.replace(/\D/g,'') : '';
+        if(num) {
+            window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`);
+        } else {
+            alert("Número de telefone não cadastrado!");        }
+    }
+    // === FIM FUNÇÕES RENOVAÇÃO ===
 
     function renderClientes() {
         const lista = document.getElementById('listaClientes');
@@ -408,17 +525,34 @@
             
             if(!c.nome.toLowerCase().includes(search)) return;
 
+            // Lógica dos botões conforme categoria
+            let botaoRenovacao = '';
+            if(currentFilter === 'apagar') {
+                botaoRenovacao = `<button class="btn btn-sm btn-success renew-action-btn" onclick="handlePagoApenas('${c.id}')">PAGO</button>`;
+            } else {
+                botaoRenovacao = `
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="btn btn-sm btn-primary renew-toggle-btn" onclick="toggleRenewButtons('${c.id}')">RENOVAR</button>
+                        <div id="renewOpts-${c.id}" class="renew-options">
+                            <button class="btn btn-sm btn-success renew-action-btn" onclick="handleRenewal('${c.id}', 'renovar')">RENOVAR</button>
+                            <button class="btn btn-sm btn-warning renew-action-btn" onclick="handleRenewal('${c.id}', 'aReceber')">A RECEBER</button>
+                        </div>
+                    </div>                `;
+            }
+
+            const dataExibicao = formatDateBR(c.data);
+            const valorExibicao = formatCurrencyBR(c.valor);
+
             lista.innerHTML += `
                 <div class="card-cliente">
                     <div class="d-flex justify-content-between">
                         <h5>${c.nome}</h5>
-                        <span class="badge ${statusReal === 'expirado' ? 'bg-danger' : (statusReal === 'vencer' ? 'bg-warning' : 'bg-success')}">${c.data}</span>
+                        <span class="badge ${statusReal === 'expirado' ? 'bg-danger' : (statusReal === 'vencer' ? 'bg-warning' : 'bg-success')}">${dataExibicao}</span>
                     </div>
-                    <p class="small mb-2">User: ${c.user} | Valor: <strong>R$${c.valor}</strong></p>
+                    <p class="small mb-2">User: ${c.user} | Valor: <strong>${valorExibicao}</strong></p>
                     <div class="d-flex flex-wrap gap-1">
                         <button class="btn btn-sm btn-success" onclick="sendZap('${c.id}', 'cobranca')">COBRAR</button>
-                        <button class="btn btn-sm btn-primary" onclick="updateStatus('${c.id}', 'pago')">PAGO</button>
-                        <button class="btn btn-sm btn-warning" onclick="updateStatus('${c.id}', 'naopago')">NÃO PAGO</button>
+                        ${botaoRenovacao}
                         <button class="btn btn-sm" style="background-color: #25D366; color: white;" onclick="openWhatsApp('${c.id}')"><i class="bi bi-whatsapp"></i></button>
                         <button class="btn btn-sm bg-lilas" onclick="editCliente('${c.id}')"><i class="bi bi-pencil"></i></button>
                         ${c.status === 'deletado' ? 
@@ -446,13 +580,13 @@
         const novaData = new Date();
         novaData.setMonth(novaData.getMonth() + 1);
         const dataFormat = novaData.toLocaleDateString('pt-BR');
+        const valorFormatado = formatCurrencyBR(c.valor);
 
         if(tipo === 'cobranca') {
-            msg = `📩 𝕞𝕤𝕘-𝕒𝕦𝕥𝕠𝕞á𝕥𝕚𝕔𝕒📩\n🚨🚨🚨🚨🚨🚨🚨🚨\n\nOla ${c.nome}!!\nSou o assistente virtual da ITVplayer 🤖\n\nSua lista de\nTV, FILMES & SÉRIES\nexpirou ${c.data}\n\nPara renovar Faz um Pix 💠\n💰Plano Familia: R$:${c.valor}\n${config.msg || ""}`;
+            msg = `📩 𝕞𝕤𝕘-𝕒𝕦𝕥𝕠𝕞á𝕥𝕚𝕔𝕒📩\n🚨🚨🚨🚨🚨🚨🚨🚨\n\nOla ${c.nome}!!\nSou o assistente virtual da ITVplayer 🤖\n\nSua lista de\nTV, FILMES & SÉRIES\nexpirou ${formatDateBR(c.data)}\n\nPara renovar Faz um Pix 💠\n💰Plano Familia: ${valorFormatado}\n${config.msg || ""}`;
         } else if(tipo === 'pago') {
-            msg = `✅𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆𝕊!!\n\nNome: ${c.nome}\nPlano Familia: ${c.valor}\nProvedor: ${c.serv}\nUsuário: ${c.user}\nSenha: ${c.pass}\nUrl: ${c.url}\nVence: ${dataFormat}\n\nDivirta-se!!`;
-        } else {
-            msg = `⛔️𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 ℕ𝔸𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆𝕊!!\n\nNome: ${c.nome}\nPlano Familia: ${c.valor}\nProvedor: ${c.serv}\nUsuário: ${c.user}\nSenha: ${c.pass}\nUrl: ${c.url}\nVence: ${dataFormat}\n\nDivirta-se!!`;
+            msg = `✅𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆𝕊!!\n\nNome: ${c.nome}\nPlano Familia: ${valorFormatado}\nProvedor: ${c.serv}\nUsuário: ${c.user}\nSenha: ${c.pass}\nUrl: ${c.url}\nVence: ${dataFormat}\n\nDivirta-se!!`;
+        } else {            msg = `⛔️𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 ℕ𝔸𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆𝕊!!\n\nNome: ${c.nome}\nPlano Familia: ${valorFormatado}\nProvedor: ${c.serv}\nUsuário: ${c.user}\nSenha: ${c.pass}\nUrl: ${c.url}\nVence: ${formatDateBR(c.data)}\n\nDivirta-se!!`;
         }
         
         window.open(`https://wa.me/${c.tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
@@ -497,19 +631,7 @@
     function accessPanel(n) { const url = config['p'+n]; if(url) window.open(url); else alert("Cadastre a URL no menu lateral"); }
 
     function editCliente(id) {
-        const c = clientes.find(item => item.id === id);
-        if(!c) return;
-        document.getElementById('editId').value = c.id;
-        document.getElementById('cNome').value = c.nome;
-        document.getElementById('cUser').value = c.user;
-        document.getElementById('cPass').value = c.pass;
-        document.getElementById('cValor').value = c.valor;
-        document.getElementById('cData').value = c.data;
-        document.getElementById('cServ').value = c.serv;
-        document.getElementById('cUrl').value = c.url;
-        document.getElementById('cTel').value = c.tel;
-        document.getElementById('cObs').value = c.obs;
-        new bootstrap.Modal(document.getElementById('modalCadastro')).show();
+        showModalCadastro(id);
     }
 </script>
 </body>
