@@ -48,7 +48,8 @@
         <div id="formLogin">
             <div class="mb-3">
                 <label class="form-label small text-secondary">E-mail</label>
-                <input type="email" id="loginEmail" class="form-control bg-dark text-white border-secondary" placeholder="seu@email.com">            </div>
+                <input type="email" id="loginEmail" class="form-control bg-dark text-white border-secondary" placeholder="seu@email.com">
+            </div>
             <div class="mb-3">
                 <label class="form-label small text-secondary">Senha</label>
                 <input type="password" id="loginSenha" class="form-control bg-dark text-white border-secondary" placeholder="******">
@@ -97,7 +98,8 @@
         </div>
     </div>
     <!-- Botão posicionado no lado direito superior de forma fixa -->
-    <button class="btn btn-add-fixo" onclick="showModalCadastro()"><i class="bi bi-plus-lg"></i></button></nav>
+    <button class="btn btn-add-fixo" onclick="showModalCadastro()"><i class="bi bi-plus-lg"></i></button>
+</nav>
 
 <div class="container mt-3">
     
@@ -146,7 +148,8 @@
     </div>
 
     <div class="d-flex gap-2 mb-4">
-        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(1)">CENTRAL</button>        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(2)">WAREZ</button>
+        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(1)">CENTRAL</button>
+        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(2)">WAREZ</button>
         <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(3)">ZEUS</button>
     </div>
 
@@ -195,7 +198,8 @@
 
     // Inicializando Firebase
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
     let clientes = [];
     let config = { msg: "", p1: "", p2: "", p3: "" };
@@ -244,7 +248,7 @@
             return `${parts[2]}-${parts[1]}-${parts[0]}`;
         }
         return dateBR;
-    }    // ============================================
+    }    
 
     // Monitoramento do Estado de Login em Tempo Real
     auth.onAuthStateChanged(user => {
@@ -293,7 +297,8 @@
 
         db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes")
         .onSnapshot(snapshot => {
-            clientes = [];            snapshot.forEach(doc => {
+            clientes = [];
+            snapshot.forEach(doc => {
                 clientes.push({ id: doc.id, ...doc.data() });
             });
             checkLock();
@@ -342,7 +347,8 @@
             document.getElementById('cValor').value = "";
             document.getElementById('cData').value = "";
             document.getElementById('cServ').value = "";
-            document.getElementById('cUrl').value = "";            document.getElementById('cTel').value = "";
+            document.getElementById('cUrl').value = "";
+            document.getElementById('cTel').value = "";
             document.getElementById('cObs').value = "";
         } else {
             const c = clientes.find(item => item.id === id);
@@ -391,37 +397,46 @@
         } else {
             const index = clientes.findIndex(c => c.id === id);
             novo.status = clientes[index].status;
-            db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).set(novo)                .then(() => modalInstance.hide());
+            db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).set(novo)
+                .then(() => modalInstance.hide());
         }
     }
 
+    // =====================================================
+    // GESTÃO FINANCEIRA - REGRA ATUALIZADA CONFORME PEDIDO
+    // =====================================================
+    // A RECEBER: soma valores de clientes cuja data de vencimento está no mês selecionado (ainda não renovaram)
+    // RECEBIDO (MÊS) = LUCRO GERAL - A RECEBER
+    // LUCRO GERAL = soma de todos os clientes ativos (não deletados)
     function renderFinanceiro() {
-        const mesSelecionado = document.getElementById('filterMes').value; 
-        let received = 0;
-        let pending = 0;
-        let totalGeneral = 0;
-        let totalActive = 0;
+        const mesSelecionado = document.getElementById('filterMes').value; // formato YYYY-MM
+        let aReceber = 0;
+        let totalGeral = 0;
+        let totalClientesAtivos = 0;
 
         clientes.forEach(c => {
+            // Ignora clientes deletados
             if(c.status !== 'deletado') {
-                const val = parseFloat(c.valor) || 0;
-                totalGeneral += val;
-                totalActive++;
-                
+                const valorMensal = parseFloat(c.valor) || 0;
+                totalGeral += valorMensal;
+                totalClientesAtivos++;
+
+                // Verifica se o cliente possui data de vencimento e se ela está no mês selecionado
+                // Clientes com vencimento no mês = ainda não pagaram aquele mês (não renovaram)
                 if(c.data && c.data.startsWith(mesSelecionado)) {
-                    if(c.status === 'ativo' || c.status === 'vencer' || c.status === 'expirado') {
-                        received += val;
-                    } else if(c.status === 'apagar') {
-                        pending += val;
-                    }
+                    aReceber += valorMensal;
                 }
             }
         });
 
-        document.getElementById('finRecebido').innerText = formatCurrencyBR(received);
-        document.getElementById('finPendente').innerText = formatCurrencyBR(pending);
-        document.getElementById('finTotalClientes').innerText = totalActive;
-        document.getElementById('finGeral').innerText = formatCurrencyBR(totalGeneral);
+        // Recebido (Mês) = Total Geral - A Receber
+        const recebidoMes = totalGeral - aReceber;
+
+        // Atualiza os cards
+        document.getElementById('finRecebido').innerText = formatCurrencyBR(recebidoMes);
+        document.getElementById('finPendente').innerText = formatCurrencyBR(aReceber);
+        document.getElementById('finTotalClientes').innerText = totalClientesAtivos;
+        document.getElementById('finGeral').innerText = formatCurrencyBR(totalGeral);
     }
 
     function openWhatsApp(id) {
@@ -489,7 +504,8 @@
         if(num) {
             window.open(`https://wa.me/${num}?text=${encodeURIComponent(msg)}`);
         } else {
-            alert("Número de telefone não cadastrado!");        }
+            alert("Número de telefone não cadastrado!");
+        }
     }
     // === FIM FUNÇÕES RENOVAÇÃO ===
 
@@ -538,7 +554,7 @@
                             <button class="btn btn-sm btn-success renew-action-btn" onclick="handleRenewal('${c.id}', 'renovar')">RENOVAR</button>
                             <button class="btn btn-sm btn-warning renew-action-btn" onclick="handleRenewal('${c.id}', 'aReceber')">A RECEBER</button>
                         </div>
-                    </div>                `;
+                    </div>`;
             }
 
             const dataExibicao = formatDateBR(c.data);
@@ -587,7 +603,8 @@
             msg = `📩 𝕞𝕤𝕘-𝕒𝕦𝕥𝕠𝕞á𝕥𝕚𝕔𝕒📩\n🚨🚨🚨🚨🚨🚨🚨🚨\n\nOla ${c.nome}!!\nSou o assistente virtual da ITVplayer 🤖\n\nSua lista de\nTV, FILMES & SÉRIES\nexpirou ${formatDateBR(c.data)}\n\nPara renovar Faz um Pix 💠\n💰Plano Familia: ${valorFormatado}\n${config.msg || ""}`;
         } else if(tipo === 'pago') {
             msg = `✅𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆𝕊!!\n\nNome: ${c.nome}\nPlano Familia: ${valorFormatado}\nProvedor: ${c.serv}\nUsuário: ${c.user}\nSenha: ${c.pass}\nUrl: ${c.url}\nVence: ${dataFormat}\n\nDivirta-se!!`;
-        } else {            msg = `⛔️𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 ℕ𝔸𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆𝕊!!\n\nNome: ${c.nome}\nPlano Familia: ${valorFormatado}\nProvedor: ${c.serv}\nUsuário: ${c.user}\nSenha: ${c.pass}\nUrl: ${c.url}\nVence: ${formatDateBR(c.data)}\n\nDivirta-se!!`;
+        } else {
+            msg = `⛔️𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 ℕ𝔸𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆𝕊!!\n\nNome: ${c.nome}\nPlano Familia: ${valorFormatado}\nProvedor: ${c.serv}\nUsuário: ${c.user}\nSenha: ${c.pass}\nUrl: ${c.url}\nVence: ${formatDateBR(c.data)}\n\nDivirta-se!!`;
         }
         
         window.open(`https://wa.me/${c.tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
