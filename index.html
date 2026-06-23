@@ -16,7 +16,7 @@
         .btn-small { font-size: 0.7rem; padding: 5px; flex: 1; margin: 2px; border: none; color: white; border-radius: 30px; font-weight: 500; }
         .bg-lilas { background-color: #9933ff !important; color: white; }
         #adminLock { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .menu-lateral { height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0; background-color: #111; overflow-x: hidden; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 12px rgba(0,0,0,0.5); }
+        .menu-lateral { height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0; background-color: #111; overflow-x: hidden; transition: 0.3s; padding-top: 60px; box-shadow: 2px 0 12px rgba(0,0,0,0.5); overflow-y: auto; }
         .menu-lateral a, .menu-lateral label { padding: 8px 32px; text-decoration: none; font-size: 16px; color: #ddd; display: block; }
         .card-financeiro { background: #222; border-left: 4px solid #9933ff; border-radius: 12px; padding: 12px; margin-bottom: 12px; }
         .stat-val { font-size: 1.4rem; font-weight: bold; color: #00ff00; }
@@ -47,8 +47,7 @@
         .modal-acoes-row .btn { flex: 1; font-size: 0.78rem; font-weight: 600; padding: 10px 4px; border-radius: 12px; border: none; color: white; display: flex; align-items: center; justify-content: center; gap: 4px; }
 
         /* NOVA NAVBAR INFERIOR */
-        .navbar-inferior {            display: flex;
-            align-items: center;
+        .navbar-inferior {            display: flex;            align-items: center;
             justify-content: space-between;
             width: 100%;
             gap: 10px;
@@ -97,14 +96,105 @@
             font-weight: 400;
         }
         .btn-menu-bottom {            background: transparent;
-            border: none;
-            color: #fff;
+            border: none;            color: #fff;
             font-size: 1.6rem;
             padding: 4px 8px;
         }
+
+        /* ===== NOVOS ESTILOS - MENU LATERAL COM BOTÕES ===== */
+        .menu-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 16px 20px;
+        }
+        .menu-btn-principal {
+            background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+            border: 1px solid #444;
+            color: #fff;
+            padding: 14px 16px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .menu-btn-principal:active { transform: scale(0.98); border-color: #9933ff; }
+        .menu-btn-principal.active { border-color: #9933ff; background: linear-gradient(135deg, #3a1a5a, #1a1a1a); }
+        .menu-btn-principal .bi { font-size: 1.2rem; color: #9933ff; }
+        .menu-secao {
+            display: none;
+            padding: 12px 20px 20px 20px;
+            border-top: 1px solid #222;
+            margin-top: 4px;
+        }
+        .menu-secao.active { display: block; }
+        .menu-secao h6 {
+            color: #9933ff;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        .painel-config-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;        }
+        .painel-config-card h6 {
+            color: #fff;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .creditos-display {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #000;
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 6px 10px;
+            margin-top: 8px;
+        }
+        .creditos-display .cred-label { font-size: 0.72rem; color: #aaa; }
+        .creditos-display .cred-value { font-size: 1.1rem; font-weight: bold; color: #00ff00; }
+        .creditos-controls { display: flex; align-items: center; gap: 6px; }
+        .creditos-controls button {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            border: none;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .creditos-controls .btn-menos { background: #dc3545; }
+        .creditos-controls .btn-mais { background: #198754; }
+        .creditos-controls input {
+            width: 60px !important;
+            text-align: center !important;
+            font-weight: bold !important;
+            padding: 4px !important;
+        }
+        .badge-creditos {
+            background: #9933ff;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 50px;
+            margin-left: auto;
+        }
         
-        @media (max-width: 576px) {
-            .card-cliente h5 { font-size: 1rem; }
+        @media (max-width: 576px) {            .card-cliente h5 { font-size: 1rem; }
             .stat-val { font-size: 1.2rem; }
             .modal-acoes-row .btn { font-size: 0.72rem; padding: 9px 2px; }
             .navbar-brand-bottom { font-size: 0.85rem; }
@@ -141,18 +231,93 @@
     <button class="btn btn-primary" onclick="unlockApp()">Desbloquear</button>
 </div>
 
+<!-- MENU LATERAL REESTRUTURADO COM 3 BOTÕES -->
 <div id="mySidenav" class="menu-lateral">
-    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-    <div class="p-3">
-        <label>📢 Msg Cobrança:</label>
-        <textarea id="cfgMsg" class="form-control mb-2" rows="2"></textarea>        <label>🔗 Painel 1 (CENTRAL):</label>
-        <input type="text" id="url1" class="form-control mb-2">
-        <label>🔗 Painel 2 (WAREZ):</label>
-        <input type="text" id="url2" class="form-control mb-2">
-        <label>🔗 Painel 3 (ZEUS):</label>
-        <input type="text" id="url3" class="form-control mb-2">
-        <button class="btn btn-info w-100 mt-2" onclick="saveSettings()">Salvar Configurações</button>
-        <button class="btn btn-danger w-100 mt-4" onclick="handleLogout()">Sair da Conta</button>
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()" style="position:absolute; top:10px; right:20px; font-size:32px;">&times;</a>
+    
+    <div class="menu-btn-group">
+        <!-- 1° Botão - Conf Cobrança -->
+        <button class="menu-btn-principal" onclick="toggleMenuSecao('secCobranca', this)">
+            <i class="bi bi-chat-dots-fill"></i>
+            <span>Conf Cobrança</span>
+        </button>
+        <div class="menu-secao" id="secCobranca">
+            <h6>📢 Mensagem de Cobrança</h6>
+            <textarea id="cfgMsg" class="form-control mb-2" rows="3" placeholder="Digite a mensagem que será enviada..."></textarea>            <button class="btn btn-success w-100" onclick="saveSettings()">💾 Salvar Mensagem</button>
+        </div>
+
+        <!-- 2° Botão - Conf Painel -->
+        <button class="menu-btn-principal" onclick="toggleMenuSecao('secPaineis', this)">
+            <i class="bi bi-hdd-stack-fill"></i>
+            <span>Conf Painel</span>
+        </button>
+        <div class="menu-secao" id="secPaineis">
+            <h6>⚙️ Configuração dos Painéis</h6>
+
+            <!-- Painel CENTRAL -->
+            <div class="painel-config-card">
+                <h6><i class="bi bi-broadcast text-info"></i> Painel 1 (CENTRAL)</h6>
+                <label class="small text-secondary">🔗 Link do Painel:</label>
+                <input type="text" id="url1" class="form-control mb-2" placeholder="https://...">
+                <label class="small text-secondary">💳 Quantidade de Créditos:</label>
+                <div class="creditos-display">
+                    <div>
+                        <div class="cred-label">Disponíveis</div>
+                        <div class="cred-value" id="credCentralDisplay">0</div>
+                    </div>
+                    <div class="creditos-controls">
+                        <button class="btn-menos" onclick="ajustarCredito('central', -1)">−</button>
+                        <input type="number" id="credCentral" class="form-control" value="0" min="0" onchange="atualizarDisplayCredito('central')">
+                        <button class="btn-mais" onclick="ajustarCredito('central', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel WAREZ -->
+            <div class="painel-config-card">
+                <h6><i class="bi bi-lightning-fill text-warning"></i> Painel 2 (WAREZ)</h6>
+                <label class="small text-secondary">🔗 Link do Painel:</label>
+                <input type="text" id="url2" class="form-control mb-2" placeholder="https://...">
+                <label class="small text-secondary">💳 Quantidade de Créditos:</label>
+                <div class="creditos-display">
+                    <div>
+                        <div class="cred-label">Disponíveis</div>
+                        <div class="cred-value" id="credWarezDisplay">0</div>
+                    </div>
+                    <div class="creditos-controls">
+                        <button class="btn-menos" onclick="ajustarCredito('warez', -1)">−</button>
+                        <input type="number" id="credWarez" class="form-control" value="0" min="0" onchange="atualizarDisplayCredito('warez')">
+                        <button class="btn-mais" onclick="ajustarCredito('warez', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel ZEUS -->            <div class="painel-config-card">
+                <h6><i class="bi bi-fire text-danger"></i> Painel 3 (ZEUS)</h6>
+                <label class="small text-secondary">🔗 Link do Painel:</label>
+                <input type="text" id="url3" class="form-control mb-2" placeholder="https://...">
+                <label class="small text-secondary">💳 Quantidade de Créditos:</label>
+                <div class="creditos-display">
+                    <div>
+                        <div class="cred-label">Disponíveis</div>
+                        <div class="cred-value" id="credZeusDisplay">0</div>
+                    </div>
+                    <div class="creditos-controls">
+                        <button class="btn-menos" onclick="ajustarCredito('zeus', -1)">−</button>
+                        <input type="number" id="credZeus" class="form-control" value="0" min="0" onchange="atualizarDisplayCredito('zeus')">
+                        <button class="btn-mais" onclick="ajustarCredito('zeus', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-success w-100 mt-2" onclick="saveSettings()">💾 Salvar Configurações</button>
+        </div>
+
+        <!-- 3° Botão - Sair -->
+        <button class="menu-btn-principal" onclick="handleLogout()" style="background: linear-gradient(135deg, #5a1a1a, #1a1a1a); border-color: #dc3545;">
+            <i class="bi bi-box-arrow-right" style="color: #dc3545;"></i>
+            <span>Sair</span>
+        </button>
     </div>
 </div>
 
@@ -176,8 +341,7 @@
 
 <div class="container mt-2">
     <div id="adminPanel" class="mb-4 p-2">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <h5 class="m-0"><i class="bi bi-cash-stack text-success"></i> Financeiro</h5>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">            <h5 class="m-0"><i class="bi bi-cash-stack text-success"></i> Financeiro</h5>
             <input type="month" id="filterMes" class="form-control w-auto bg-dark text-white border-secondary" style="max-width: 170px;">
         </div>
         <div class="row g-2">
@@ -199,9 +363,9 @@
     </div>
 
     <div class="nav-buttons-painel">
-        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(1)">📡 CENTRAL</button>
-        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(2)">⚡ WAREZ</button>
-        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(3)">🔥 ZEUS</button>
+        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(1)">📡 CENTRAL <span id="badgeCentral" class="badge-creditos">0</span></button>
+        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(2)">⚡ WAREZ <span id="badgeWarez" class="badge-creditos">0</span></button>
+        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(3)">🔥 ZEUS <span id="badgeZeus" class="badge-creditos">0</span></button>
     </div>
 
     <div id="listaClientes"></div>
@@ -221,6 +385,12 @@
                 <label class="small">Servidor:</label><input type="text" id="cServ" class="form-control mb-2">
                 <label class="small">URL Playlist:</label><input type="text" id="cUrl" class="form-control mb-2">
                 <label class="small">WhatsApp (com DDD):</label><input type="tel" id="cTel" class="form-control mb-2" placeholder="55999999999">
+                <!-- NOVO CAMPO: Painel do cliente -->
+                <label class="small">Painel (onde será renovado):</label>
+                <select id="cPainel" class="form-control form-select mb-2">
+                    <option value="central">📡 CENTRAL</option>
+                    <option value="warez">⚡ WAREZ</option>
+                    <option value="zeus">🔥 ZEUS</option>                </select>
                 <label class="small">Observações:</label><textarea id="cObs" class="form-control mb-2" rows="2"></textarea>
                 <button class="btn btn-success w-100 mt-2 rounded-pill" onclick="saveCliente()">Salvar Cliente</button>
             </div>
@@ -265,12 +435,11 @@
     const db = firebase.firestore();
 
     let clientes = [];
-    let config = { msg: "", p1: "", p2: "", p3: "" };
+    let config = { msg: "", p1: "", p2: "", p3: "", credCentral: 0, credWarez: 0, credZeus: 0 };
     let currentFilter = 'ativos';
     let usuarioLogadoUid = null;
 
     document.getElementById('filterMes').value = new Date().toISOString().slice(0, 7);
-
     auth.onAuthStateChanged(user => {
         if (user) {
             usuarioLogadoUid = user.uid;
@@ -292,17 +461,96 @@
         auth.signInWithEmailAndPassword(email, senha).catch(err => alert("Erro: " + err.message));
     }
     function handleLogout() { auth.signOut().then(() => closeNav()); }
-    function openNav() { document.getElementById("mySidenav").style.width = "260px"; }    function closeNav() { document.getElementById("mySidenav").style.width = "0"; }
+    function openNav() { document.getElementById("mySidenav").style.width = "300px"; }
+    function closeNav() {
+        document.getElementById("mySidenav").style.width = "0";
+        // Fecha todas as seções ao fechar o menu
+        document.querySelectorAll('.menu-secao').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.menu-btn-principal').forEach(b => b.classList.remove('active'));
+    }
     function unlockApp() { document.getElementById('adminLock').style.display = 'none'; }
+
+    // ===== NOVA FUNÇÃO: Alterna as seções do menu =====
+    function toggleMenuSecao(idSecao, btn) {
+        const secao = document.getElementById(idSecao);
+        const estaAberta = secao.classList.contains('active');
+
+        // Fecha todas as seções
+        document.querySelectorAll('.menu-secao').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.menu-btn-principal').forEach(b => b.classList.remove('active'));
+
+        if (!estaAberta) {
+            secao.classList.add('active');
+            btn.classList.add('active');
+        }
+    }
+
+    // ===== NOVAS FUNÇÕES: Controle de créditos =====
+    function ajustarCredito(painel, delta) {
+        const inputId = 'cred' + painel.charAt(0).toUpperCase() + painel.slice(1);
+        const input = document.getElementById(inputId);        let val = parseInt(input.value) || 0;
+        val = Math.max(0, val + delta);
+        input.value = val;
+        atualizarDisplayCredito(painel);
+    }
+    function atualizarDisplayCredito(painel) {
+        const inputId = 'cred' + painel.charAt(0).toUpperCase() + painel.slice(1);
+        const displayId = 'cred' + painel.charAt(0).toUpperCase() + painel.slice(1) + 'Display';
+        const val = parseInt(document.getElementById(inputId).value) || 0;
+        document.getElementById(displayId).innerText = val;
+    }
+    function atualizarBadgesCreditos() {
+        document.getElementById('badgeCentral').innerText = config.credCentral || 0;
+        document.getElementById('badgeWarez').innerText = config.credWarez || 0;
+        document.getElementById('badgeZeus').innerText = config.credZeus || 0;
+        document.getElementById('credCentralDisplay').innerText = config.credCentral || 0;
+        document.getElementById('credWarezDisplay').innerText = config.credWarez || 0;
+        document.getElementById('credZeusDisplay').innerText = config.credZeus || 0;
+    }
+
+    // ===== NOVA FUNÇÃO: Consome 1 crédito do painel ao renovar =====
+    function consumirCredito(painel) {
+        const chave = 'cred' + painel.charAt(0).toUpperCase() + painel.slice(1);
+        const atual = parseInt(config[chave]) || 0;
+        if (atual <= 0) {
+            alert(`⚠️ Sem créditos no Painel ${painel.toUpperCase()}! Adicione créditos no menu "Conf Painel".`);
+            return false;
+        }
+        config[chave] = atual - 1;
+        db.collection("usuarios").doc(usuarioLogadoUid).collection("config").doc("geral")
+          .update({ [chave]: config[chave] })
+          .catch(e => console.error("Erro ao atualizar crédito:", e));
+        atualizarBadgesCreditos();
+        // Atualiza input do menu se estiver aberto
+        const inputId = 'cred' + painel.charAt(0).toUpperCase() + painel.slice(1);
+        const input = document.getElementById(inputId);
+        if (input) input.value = config[chave];
+        return true;
+    }
     
     function syncConfigAndClients() {
         if(!usuarioLogadoUid) return;
         db.collection("usuarios").doc(usuarioLogadoUid).collection("config").doc("geral").onSnapshot(doc => {
-            if(doc.exists) { config = doc.data(); } else { config = { msg: "", p1: "", p2: "", p3: "" }; }
+            if(doc.exists) {
+                config = doc.data();
+                // Garante valores padrão
+                config.msg = config.msg || "";
+                config.p1 = config.p1 || "";
+                config.p2 = config.p2 || "";
+                config.p3 = config.p3 || "";                config.credCentral = parseInt(config.credCentral) || 0;
+                config.credWarez = parseInt(config.credWarez) || 0;
+                config.credZeus = parseInt(config.credZeus) || 0;
+            } else {
+                config = { msg: "", p1: "", p2: "", p3: "", credCentral: 0, credWarez: 0, credZeus: 0 };
+            }
             document.getElementById('cfgMsg').value = config.msg || "";
             document.getElementById('url1').value = config.p1 || "";
             document.getElementById('url2').value = config.p2 || "";
             document.getElementById('url3').value = config.p3 || "";
+            document.getElementById('credCentral').value = config.credCentral;
+            document.getElementById('credWarez').value = config.credWarez;
+            document.getElementById('credZeus').value = config.credZeus;
+            atualizarBadgesCreditos();
         });        db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").onSnapshot(snapshot => {
             clientes = [];
             snapshot.forEach(doc => { clientes.push({ id: doc.id, ...doc.data() }); });
@@ -316,9 +564,15 @@
             msg: document.getElementById('cfgMsg').value,
             p1: document.getElementById('url1').value,
             p2: document.getElementById('url2').value,
-            p3: document.getElementById('url3').value
+            p3: document.getElementById('url3').value,
+            credCentral: parseInt(document.getElementById('credCentral').value) || 0,
+            credWarez: parseInt(document.getElementById('credWarez').value) || 0,
+            credZeus: parseInt(document.getElementById('credZeus').value) || 0
         };
-        db.collection("usuarios").doc(usuarioLogadoUid).collection("config").doc("geral").set(config).then(() => closeNav()).catch(err => alert("Erro: "+err.message));
+        db.collection("usuarios").doc(usuarioLogadoUid).collection("config").doc("geral").set(config).then(() => {
+            atualizarBadgesCreditos();
+            alert("✅ Configurações salvas!");
+        }).catch(err => alert("Erro: "+err.message));
     }
 
     function showModalCadastro(id = "") {
@@ -327,12 +581,12 @@
             document.getElementById('cNome').value = ""; document.getElementById('cUser').value = ""; document.getElementById('cPass').value = "";
             document.getElementById('cValor').value = ""; document.getElementById('cData').value = ""; document.getElementById('cServ').value = "";
             document.getElementById('cUrl').value = ""; document.getElementById('cTel').value = ""; document.getElementById('cObs').value = "";
+            document.getElementById('cPainel').value = "central";
         }
         new bootstrap.Modal(document.getElementById('modalCadastro')).show();
     }
 
-    function saveCliente() {
-        if(!usuarioLogadoUid) return;
+    function saveCliente() {        if(!usuarioLogadoUid) return;
         const id = document.getElementById('editId').value;
         const clienteData = {
             nome: document.getElementById('cNome').value,
@@ -343,6 +597,7 @@
             serv: document.getElementById('cServ').value,
             url: document.getElementById('cUrl').value,            tel: document.getElementById('cTel').value,
             obs: document.getElementById('cObs').value,
+            painel: document.getElementById('cPainel').value || 'central',
             status: 'ativo'
         };
         const modalEl = document.getElementById('modalCadastro');
@@ -375,10 +630,15 @@
     function renovarCliente(id) {
         const cliente = clientes.find(c => c.id === id);
         if(!cliente) return;
+
+        // ===== CONSOME CRÉDITO DO PAINEL =====
+        const painel = cliente.painel || 'central';
+        if(!consumirCredito(painel)) return;
+        // =====================================
         const novaDataISO = addOneMonthFromToday();
         const novaDataBR = formatarDataBR(novaDataISO);
         const valorFormat = `R$ ${cliente.valor.toFixed(2)}`;
-        const msg = `✅𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆𝕊!!\n\nNome: ${cliente.nome}\nPlano Familia: ${valorFormat}\nProvedor: ${cliente.serv || 'ITV'}\nUsuário: ${cliente.user}\nSenha: ${cliente.pass}\nUrl: ${cliente.url}\nVence: ${novaDataBR}\n\nDivirta-se!!`;
+        const msg = `✅𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆!!\n\nNome: ${cliente.nome}\nPlano Familia: ${valorFormat}\nProvedor: ${cliente.serv || 'ITV'}\nUsuário: ${cliente.user}\nSenha: ${cliente.pass}\nUrl: ${cliente.url}\nVence: ${novaDataBR}\n\nDivirta-se!!`;
         if(cliente.tel) {
             window.open(`https://wa.me/${cliente.tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
         } else alert("Número não cadastrado!");
@@ -391,10 +651,16 @@
     
     function marcarAReceber(id) {
         const cliente = clientes.find(c => c.id === id);        if(!cliente) return;
+
+        // ===== CONSOME CRÉDITO DO PAINEL =====
+        const painel = cliente.painel || 'central';
+        if(!consumirCredito(painel)) return;
+        // =====================================
+
         const novaDataISO = addOneMonthFromToday();
         const novaDataBR = formatarDataBR(novaDataISO);
         const valorFormat = `R$ ${cliente.valor.toFixed(2)}`;
-        const msg = `⛔️𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 ℕ𝔸𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆𝕊!!\n\nNome: ${cliente.nome}\nPlano Familia: ${valorFormat}\nProvedor: ${cliente.serv || 'ITV'}\nUsuário: ${cliente.user}\nSenha: ${cliente.pass}\nUrl: ${cliente.url}\nVence: ${novaDataBR}\n\nDivirta-se!!`;
+        const msg = `⛔️𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 ℕ𝔸𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆!!\n\nNome: ${cliente.nome}\nPlano Familia: ${valorFormat}\nProvedor: ${cliente.serv || 'ITV'}\nUsuário: ${cliente.user}\nSenha: ${cliente.pass}\nUrl: ${cliente.url}\nVence: ${novaDataBR}\n\nDivirta-se!!`;
         if(cliente.tel) window.open(`https://wa.me/${cliente.tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
         else alert("Número não cadastrado!");
         db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).update({
@@ -407,7 +673,7 @@
         if(!cliente) return;
         const dataAtualBR = formatarDataBR(cliente.data);
         const valorFormat = `R$ ${cliente.valor.toFixed(2)}`;
-        const msg = `✅𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆𝕊!!\n\nNome: ${cliente.nome}\nPlano Familia: ${valorFormat}\nProvedor: ${cliente.serv || 'ITV'}\nUsuário: ${cliente.user}\nSenha: ${cliente.pass}\nUrl: ${cliente.url}\nVence: ${dataAtualBR}\n\nDivirta-se!!`;
+        const msg = `✅𝕊𝔼𝕌 ℙ𝔸𝔾𝔸𝕄𝔼ℕ𝕋𝕆 𝔽𝕆𝕀 ℂ𝕆ℕ𝔽𝕀ℝ𝕄𝔸𝔻𝕆!!\n\nNome: ${cliente.nome}\nPlano Familia: ${valorFormat}\nProvedor: ${cliente.serv || 'ITV'}\nUsuário: ${cliente.user}\nSenha: ${cliente.pass}\nUrl: ${cliente.url}\nVence: ${dataAtualBR}\n\nDivirta-se!!`;
         if(cliente.tel) window.open(`https://wa.me/${cliente.tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
         else alert("Número não cadastrado!");
         db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").doc(id).update({
@@ -418,8 +684,7 @@
 
     // Novo: envia dados de acesso via WhatsApp (COMPARTILHAR)
     function compartilharCliente(id) {
-        const c = clientes.find(i => i.id === id);
-        if(!c) return;
+        const c = clientes.find(i => i.id === id);        if(!c) return;
         if(!c.tel) return alert("Telefone não cadastrado!");
         const msg = `📺 *Dados de Acesso ITV*\n\n👤 Usuário: ${c.user || '-'}\n🔑 Senha: ${c.pass || '-'}\n🔗 Url: ${c.url || '-'}`;
         window.open(`https://wa.me/${c.tel.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`);
@@ -439,7 +704,9 @@
             <div class="info-item"><span class="info-label">Usuário:</span><span class="info-value">${c.user || '-'}</span></div>
             <div class="info-item"><span class="info-label">Senha:</span><span class="info-value">${c.pass || '-'}</span></div>
             <div class="info-item"><span class="info-label">Servidor:</span><span class="info-value">${c.serv || '-'}</span></div>
-            <div class="info-item"><span class="info-label">Valor:</span><span class="info-value">R$ ${c.valor.toFixed(2)}</span></div>            <div class="info-item info-full"><span class="info-label">Vencimento:</span><span class="info-value">${formatarDataBR(c.data)}</span></div>
+            <div class="info-item"><span class="info-label">Valor:</span><span class="info-value">R$ ${c.valor.toFixed(2)}</span></div>
+            <div class="info-item"><span class="info-label">Painel:</span><span class="info-value">${(c.painel || 'central').toUpperCase()}</span></div>
+            <div class="info-item info-full"><span class="info-label">Vencimento:</span><span class="info-value">${formatarDataBR(c.data)}</span></div>
         `;
         document.getElementById('acoesInfoResumo').innerHTML = infoHtml;
         
@@ -466,8 +733,7 @@
                 <div class="modal-acoes-row">
                     <button class="btn" style="background-color:#25D366;" onclick="openWhatsApp('${c.id}'); bootstrap.Modal.getInstance(document.getElementById('modalAcoes')).hide();"><i class="bi bi-whatsapp"></i> ZAP</button>
                     <button class="btn btn-success" onclick="sendCobrancaZap('${c.id}'); bootstrap.Modal.getInstance(document.getElementById('modalAcoes')).hide();">💰 COBRAR</button>
-                    <button class="btn btn-warning text-dark" onclick="renovarCliente('${c.id}'); bootstrap.Modal.getInstance(document.getElementById('modalAcoes')).hide();">🔄 RENOVAR</button>
-                    <button class="btn btn-secondary" onclick="marcarAReceber('${c.id}'); bootstrap.Modal.getInstance(document.getElementById('modalAcoes')).hide();">⏳ A RECEBER</button>
+                    <button class="btn btn-warning text-dark" onclick="renovarCliente('${c.id}'); bootstrap.Modal.getInstance(document.getElementById('modalAcoes')).hide();">🔄 RENOVAR</button>                    <button class="btn btn-secondary" onclick="marcarAReceber('${c.id}'); bootstrap.Modal.getInstance(document.getElementById('modalAcoes')).hide();">⏳ A RECEBER</button>
                 </div>
                 <div class="modal-acoes-row">
                     <button class="btn btn-info" onclick="compartilharCliente('${c.id}'); bootstrap.Modal.getInstance(document.getElementById('modalAcoes')).hide();">📤 COMPARTILHAR</button>
@@ -516,8 +782,7 @@
             listaDiv.innerHTML += `
                 <div class="card-cliente" onclick="abrirAcoesCliente('${c.id}')">
                     <div class="d-flex justify-content-between align-items-start flex-wrap">
-                        <h5 class="mb-1">${c.nome}</h5>
-                        <span class="badge ${badgeClass}">${dataExib}</span>
+                        <h5 class="mb-1">${c.nome}</h5>                        <span class="badge ${badgeClass}">${dataExib}</span>
                     </div>
                     <div class="cliente-info">
                         <div class="info-item"><span class="info-label">Usuário:</span><span class="info-value">${c.user || '-'}</span></div>
@@ -566,8 +831,7 @@
                     if(!temPagamentoNoMes) {
                         aReceber += val;
                     }
-                }
-            }
+                }            }
         });
         
         const recebido = totalGeral - aReceber;
@@ -589,6 +853,7 @@
             document.getElementById('editId').value = c.id;            document.getElementById('cNome').value = c.nome; document.getElementById('cUser').value = c.user; document.getElementById('cPass').value = c.pass;
             document.getElementById('cValor').value = c.valor; document.getElementById('cData').value = c.data; document.getElementById('cServ').value = c.serv;
             document.getElementById('cUrl').value = c.url; document.getElementById('cTel').value = c.tel; document.getElementById('cObs').value = c.obs;
+            document.getElementById('cPainel').value = c.painel || 'central';
             new bootstrap.Modal(document.getElementById('modalCadastro')).show();
         }
     }    
@@ -607,6 +872,9 @@
     window.accessPanel = accessPanel;
     window.saveSettings = saveSettings;
     window.showModalCadastro = showModalCadastro;
+    window.toggleMenuSecao = toggleMenuSecao;
+    window.ajustarCredito = ajustarCredito;
+    window.atualizarDisplayCredito = atualizarDisplayCredito;
 </script>
 </body>
 </html>
