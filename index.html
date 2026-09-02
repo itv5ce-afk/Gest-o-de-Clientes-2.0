@@ -359,7 +359,8 @@
         <button class="btn-small bg-primary" onclick="filterData('ativos')">ATIVOS <span id="countAtivos">0</span></button>
         <button class="btn-small" style="background-color: orange;" onclick="filterData('vencer')">A VENCER <span id="countVencer">0</span></button>
         <button class="btn-small bg-danger" onclick="filterData('expirados')">EXPIRADOS <span id="countExp">0</span></button>        <button class="btn-small bg-info" onclick="filterData('apagar')">A RECEBER <span id="countPagar">0</span></button>
-        <button class="btn-small bg-secondary" onclick="filterData('deletados')">LIXO <span id="countDel">0</span></button>
+        <!-- Botão LIXO ocultado conforme solicitado, mantendo a estrutura e funcionalidade intactas -->
+        <button class="btn-small bg-secondary" onclick="filterData('deletados')" style="display: none;">LIXO <span id="countDel">0</span></button>
     </div>
 
     <div class="nav-buttons-painel">
@@ -371,7 +372,8 @@
     <div id="listaClientes"></div>
 </div>
 
-<!-- Modal Cadastro/Edição --><div class="modal fade" id="modalCadastro" tabindex="-1" data-bs-backdrop="static">
+<!-- Modal Cadastro/Edição -->
+<div class="modal fade" id="modalCadastro" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content bg-dark text-white">
             <div class="modal-header border-secondary"><h5 class="modal-title">📋 Cliente</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
