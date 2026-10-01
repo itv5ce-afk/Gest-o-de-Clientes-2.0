@@ -341,11 +341,13 @@
 
 <div class="container mt-2">
     <div id="adminPanel" class="mb-4 p-2">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">            <h5 class="m-0"><i class="bi bi-cash-stack text-success"></i> Financeiro</h5>
-            <input type="month" id="filterMes" class="form-control w-auto bg-dark text-white border-secondary" style="max-width: 170px;">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h5 class="m-0"><i class="bi bi-cash-stack text-success"></i> Financeiro</h5>
+            <!-- ALTERADO: de type="month" para type="date" para exibir DD/MM/AAAA -->
+            <input type="date" id="filterData" class="form-control w-auto bg-dark text-white border-secondary" style="max-width: 170px;">
         </div>
         <div class="row g-2">
-            <div class="col-6 col-md-3"><div class="card-financeiro"><div class="stat-label">Recebido (Mês)</div><div class="stat-val" id="finRecebido">R$ 0,00</div></div></div>
+            <div class="col-6 col-md-3"><div class="card-financeiro"><div class="stat-label">Recebido (Dia)</div><div class="stat-val" id="finRecebido">R$ 0,00</div></div></div>
             <div class="col-6 col-md-3"><div class="card-financeiro" style="border-left-color: #ffc107;"><div class="stat-label">A Receber</div><div class="stat-val text-warning" id="finPendente">R$ 0,00</div></div></div>
             <div class="col-6 col-md-3"><div class="card-financeiro" style="border-left-color: #0dcaf0;"><div class="stat-label">Total Clientes</div><div class="stat-val text-info" id="finTotalClientes">0</div></div></div>
             <div class="col-6 col-md-3"><div class="card-financeiro" style="border-left-color: #00ff00;"><div class="stat-label">Lucro Geral</div><div class="stat-val" id="finGeral" style="color: #00ff00;">R$ 0,00</div></div></div>
@@ -441,7 +443,9 @@
     let currentFilter = 'ativos';
     let usuarioLogadoUid = null;
 
-    document.getElementById('filterMes').value = new Date().toISOString().slice(0, 7);
+    // ALTERADO: Inicializa com a data completa de hoje (YYYY-MM-DD)
+    document.getElementById('filterData').value = new Date().toISOString().slice(0, 10);
+    
     auth.onAuthStateChanged(user => {
         if (user) {
             usuarioLogadoUid = user.uid;
@@ -817,8 +821,9 @@
     }
     
     function renderFinanceiro() {
-        const mes = document.getElementById('filterMes').value;
-        let recebidoMes = 0;
+        // ALTERADO: Usa a data completa (YYYY-MM-DD) do novo input
+        const dataFiltro = document.getElementById('filterData').value;
+        let recebidoDia = 0;
         let totalGeral = 0;
         let totalActive = 0;
         
@@ -828,19 +833,20 @@
                 totalGeral += val;
                 totalActive++;
                 
-                const temPagamentoNoMes = c.ultimoPagamento && c.ultimoPagamento.startsWith(mes);
+                // Verifica se o último pagamento começa com a data selecionada (YYYY-MM-DD)
+                const temPagamentoNoDia = c.ultimoPagamento && c.ultimoPagamento.startsWith(dataFiltro);
                 
-                // Se houve pagamento neste mês, soma ao recebido do mês
-                if(temPagamentoNoMes) {
-                    recebidoMes += val;
+                // Se houve pagamento neste dia, soma ao recebido do dia
+                if(temPagamentoNoDia) {
+                    recebidoDia += val;
                 }
             }
         });
         
-        // A RECEBER = LUCRO GERAL - RECEBIDO (MÊS)
-        let aReceber = totalGeral - recebidoMes;
+        // A RECEBER = LUCRO GERAL - RECEBIDO (DIA)
+        let aReceber = totalGeral - recebidoDia;
         
-        document.getElementById('finRecebido').innerText = `R$ ${recebidoMes.toFixed(2)}`;
+        document.getElementById('finRecebido').innerText = `R$ ${recebidoDia.toFixed(2)}`;
         document.getElementById('finPendente').innerText = `R$ ${aReceber.toFixed(2)}`;
         document.getElementById('finTotalClientes').innerText = totalActive;
         document.getElementById('finGeral').innerText = `R$ ${totalGeral.toFixed(2)}`;
