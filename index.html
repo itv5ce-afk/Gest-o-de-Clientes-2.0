@@ -145,7 +145,8 @@
             border: 1px solid #333;
             border-radius: 12px;
             padding: 12px;
-            margin-bottom: 12px;        }
+            margin-bottom: 12px;
+        }
         .painel-config-card h6 {
             color: #fff;
             font-size: 0.85rem;
@@ -192,6 +193,52 @@
             padding: 2px 8px;
             border-radius: 50px;
             margin-left: auto;
+        }
+        
+        /* NOVO: Estilos para toggle switch */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #444;
+            transition: .4s;
+            border-radius: 26px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #198754;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
         }
         
         @media (max-width: 576px) {            .card-cliente h5 { font-size: 1rem; }
@@ -256,7 +303,15 @@
 
             <!-- Painel CENTRAL -->
             <div class="painel-config-card">
-                <h6><i class="bi bi-broadcast text-info"></i> Painel 1 (CENTRAL)</h6>
+                <div class="toggle-container">
+                    <h6 class="m-0"><i class="bi bi-broadcast text-info"></i> <span id="painel1Label">Painel 1 (CENTRAL)</span></h6>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="togglePainel1" onchange="saveSettings()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <label class="small text-secondary">📝 Nome do Painel:</label>
+                <input type="text" id="nomePainel1" class="form-control mb-2" placeholder="Nome personalizado" onchange="saveSettings()">
                 <label class="small text-secondary">🔗 Link do Painel:</label>
                 <input type="text" id="url1" class="form-control mb-2" placeholder="https://...">
                 <label class="small text-secondary">💳 Quantidade de Créditos:</label>
@@ -275,7 +330,15 @@
 
             <!-- Painel WAREZ -->
             <div class="painel-config-card">
-                <h6><i class="bi bi-lightning-fill text-warning"></i> Painel 2 (WAREZ)</h6>
+                <div class="toggle-container">
+                    <h6 class="m-0"><i class="bi bi-lightning-fill text-warning"></i> <span id="painel2Label">Painel 2 (WAREZ)</span></h6>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="togglePainel2" onchange="saveSettings()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <label class="small text-secondary">📝 Nome do Painel:</label>
+                <input type="text" id="nomePainel2" class="form-control mb-2" placeholder="Nome personalizado" onchange="saveSettings()">
                 <label class="small text-secondary">🔗 Link do Painel:</label>
                 <input type="text" id="url2" class="form-control mb-2" placeholder="https://...">
                 <label class="small text-secondary">💳 Quantidade de Créditos:</label>
@@ -292,8 +355,17 @@
                 </div>
             </div>
 
-            <!-- Painel ZEUS -->            <div class="painel-config-card">
-                <h6><i class="bi bi-fire text-danger"></i> Painel 3 (ZEUS)</h6>
+            <!-- Painel ZEUS -->
+            <div class="painel-config-card">
+                <div class="toggle-container">
+                    <h6 class="m-0"><i class="bi bi-fire text-danger"></i> <span id="painel3Label">Painel 3 (ZEUS)</span></h6>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="togglePainel3" onchange="saveSettings()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <label class="small text-secondary">📝 Nome do Painel:</label>
+                <input type="text" id="nomePainel3" class="form-control mb-2" placeholder="Nome personalizado" onchange="saveSettings()">
                 <label class="small text-secondary">🔗 Link do Painel:</label>
                 <input type="text" id="url3" class="form-control mb-2" placeholder="https://...">
                 <label class="small text-secondary">💳 Quantidade de Créditos:</label>
@@ -357,18 +429,15 @@
 
     <input type="text" id="search" class="form-control mb-3" placeholder="🔍 Buscar cliente por nome..." onkeyup="renderClientes()">
 
+    <!-- NOVO: Container para os painéis ativos -->
+    <div class="nav-buttons-painel" id="paineisAtivos"></div>
+
     <div class="filter-buttons">
         <button class="btn-small bg-primary" onclick="filterData('ativos')">ATIVOS <span id="countAtivos">0</span></button>
         <button class="btn-small" style="background-color: orange;" onclick="filterData('vencer')">A VENCER <span id="countVencer">0</span></button>
         <button class="btn-small bg-danger" onclick="filterData('expirados')">EXPIRADOS <span id="countExp">0</span></button>        <button class="btn-small bg-info" onclick="filterData('apagar')">A RECEBER <span id="countPagar">0</span></button>
         <!-- Botão LIXO ocultado conforme solicitado, mantendo a estrutura e funcionalidade intactas -->
         <button class="btn-small bg-secondary" onclick="filterData('deletados')" style="display: none;">LIXO <span id="countDel">0</span></button>
-    </div>
-
-    <div class="nav-buttons-painel">
-        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(1)">📡 CENTRAL <span id="badgeCentral" class="badge-creditos">0</span></button>
-        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(2)">⚡ WAREZ <span id="badgeWarez" class="badge-creditos">0</span></button>
-        <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(3)">🔥 ZEUS <span id="badgeZeus" class="badge-creditos">0</span></button>
     </div>
 
     <div id="listaClientes"></div>
@@ -386,7 +455,10 @@
                 <label class="small">Senha:</label><input type="text" id="cPass" class="form-control mb-2">
                 <label class="small">Valor (R$):</label><input type="number" id="cValor" class="form-control mb-2" step="0.01">
                 <label class="small">Data Vencimento:</label><input type="date" id="cData" class="form-control mb-2">
-                <label class="small">Servidor:</label><input type="text" id="cServ" class="form-control mb-2">
+                <!-- OCULTADO: Campo Servidor mantido no HTML para não quebrar o Firebase, mas oculto visualmente -->
+                <div style="display: none;">
+                    <label class="small">Servidor:</label><input type="text" id="cServ" class="form-control mb-2">
+                </div>
                 <label class="small">URL Playlist:</label><input type="text" id="cUrl" class="form-control mb-2">
                 <label class="small">WhatsApp (com DDD):</label><input type="tel" id="cTel" class="form-control mb-2" placeholder="55999999999">
                 <!-- NOVO CAMPO: Painel do cliente -->
@@ -439,7 +511,17 @@
     const db = firebase.firestore();
 
     let clientes = [];
-    let config = { msg: "", p1: "", p2: "", p3: "", credCentral: 0, credWarez: 0, credZeus: 0 };
+    let config = { 
+        msg: "", 
+        p1: "", p2: "", p3: "", 
+        credCentral: 0, credWarez: 0, credZeus: 0,
+        nomePainel1: "CENTRAL",
+        nomePainel2: "WAREZ",
+        nomePainel3: "ZEUS",
+        togglePainel1: true,
+        togglePainel2: true,
+        togglePainel3: true
+    };
     let currentFilter = 'ativos';
     let usuarioLogadoUid = null;
 
@@ -506,9 +588,6 @@
         document.getElementById(displayId).innerText = val;
     }
     function atualizarBadgesCreditos() {
-        document.getElementById('badgeCentral').innerText = config.credCentral || 0;
-        document.getElementById('badgeWarez').innerText = config.credWarez || 0;
-        document.getElementById('badgeZeus').innerText = config.credZeus || 0;
         document.getElementById('credCentralDisplay').innerText = config.credCentral || 0;
         document.getElementById('credWarezDisplay').innerText = config.credWarez || 0;
         document.getElementById('credZeusDisplay').innerText = config.credZeus || 0;
@@ -543,11 +622,28 @@
                 config.msg = config.msg || "";
                 config.p1 = config.p1 || "";
                 config.p2 = config.p2 || "";
-                config.p3 = config.p3 || "";                config.credCentral = parseInt(config.credCentral) || 0;
+                config.p3 = config.p3 || "";                
+                config.credCentral = parseInt(config.credCentral) || 0;
                 config.credWarez = parseInt(config.credWarez) || 0;
                 config.credZeus = parseInt(config.credZeus) || 0;
+                config.nomePainel1 = config.nomePainel1 || "CENTRAL";
+                config.nomePainel2 = config.nomePainel2 || "WAREZ";
+                config.nomePainel3 = config.nomePainel3 || "ZEUS";
+                config.togglePainel1 = config.togglePainel1 !== undefined ? config.togglePainel1 : true;
+                config.togglePainel2 = config.togglePainel2 !== undefined ? config.togglePainel2 : true;
+                config.togglePainel3 = config.togglePainel3 !== undefined ? config.togglePainel3 : true;
             } else {
-                config = { msg: "", p1: "", p2: "", p3: "", credCentral: 0, credWarez: 0, credZeus: 0 };
+                config = { 
+                    msg: "", 
+                    p1: "", p2: "", p3: "", 
+                    credCentral: 0, credWarez: 0, credZeus: 0,
+                    nomePainel1: "CENTRAL",
+                    nomePainel2: "WAREZ",
+                    nomePainel3: "ZEUS",
+                    togglePainel1: true,
+                    togglePainel2: true,
+                    togglePainel3: true
+                };
             }
             document.getElementById('cfgMsg').value = config.msg || "";
             document.getElementById('url1').value = config.p1 || "";
@@ -556,8 +652,19 @@
             document.getElementById('credCentral').value = config.credCentral;
             document.getElementById('credWarez').value = config.credWarez;
             document.getElementById('credZeus').value = config.credZeus;
+            document.getElementById('nomePainel1').value = config.nomePainel1;
+            document.getElementById('nomePainel2').value = config.nomePainel2;
+            document.getElementById('nomePainel3').value = config.nomePainel3;
+            document.getElementById('togglePainel1').checked = config.togglePainel1;
+            document.getElementById('togglePainel2').checked = config.togglePainel2;
+            document.getElementById('togglePainel3').checked = config.togglePainel3;
+            document.getElementById('painel1Label').innerText = `Painel 1 (${config.nomePainel1})`;
+            document.getElementById('painel2Label').innerText = `Painel 2 (${config.nomePainel2})`;
+            document.getElementById('painel3Label').innerText = `Painel 3 (${config.nomePainel3})`;
             atualizarBadgesCreditos();
-        });        db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").onSnapshot(snapshot => {
+            renderPaineisAtivos();
+        });        
+        db.collection("usuarios").doc(usuarioLogadoUid).collection("clientes").onSnapshot(snapshot => {
             clientes = [];
             snapshot.forEach(doc => { clientes.push({ id: doc.id, ...doc.data() }); });
             renderClientes();
@@ -573,12 +680,50 @@
             p3: document.getElementById('url3').value,
             credCentral: parseInt(document.getElementById('credCentral').value) || 0,
             credWarez: parseInt(document.getElementById('credWarez').value) || 0,
-            credZeus: parseInt(document.getElementById('credZeus').value) || 0
+            credZeus: parseInt(document.getElementById('credZeus').value) || 0,
+            nomePainel1: document.getElementById('nomePainel1').value || "CENTRAL",
+            nomePainel2: document.getElementById('nomePainel2').value || "WAREZ",
+            nomePainel3: document.getElementById('nomePainel3').value || "ZEUS",
+            togglePainel1: document.getElementById('togglePainel1').checked,
+            togglePainel2: document.getElementById('togglePainel2').checked,
+            togglePainel3: document.getElementById('togglePainel3').checked
         };
         db.collection("usuarios").doc(usuarioLogadoUid).collection("config").doc("geral").set(config).then(() => {
             atualizarBadgesCreditos();
+            document.getElementById('painel1Label').innerText = `Painel 1 (${config.nomePainel1})`;
+            document.getElementById('painel2Label').innerText = `Painel 2 (${config.nomePainel2})`;
+            document.getElementById('painel3Label').innerText = `Painel 3 (${config.nomePainel3})`;
+            renderPaineisAtivos();
             alert("✅ Configurações salvas!");
         }).catch(err => alert("Erro: "+err.message));
+    }
+
+    // NOVO: Renderiza apenas os painéis que estão ativos
+    function renderPaineisAtivos() {
+        const container = document.getElementById('paineisAtivos');
+        container.innerHTML = '';
+        
+        if(config.togglePainel1) {
+            container.innerHTML += `
+                <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(1)">
+                    📡 ${config.nomePainel1} <span id="badgeCentral" class="badge-creditos">${config.credCentral || 0}</span>
+                </button>
+            `;
+        }
+        if(config.togglePainel2) {
+            container.innerHTML += `
+                <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(2)">
+                    ⚡ ${config.nomePainel2} <span id="badgeWarez" class="badge-creditos">${config.credWarez || 0}</span>
+                </button>
+            `;
+        }
+        if(config.togglePainel3) {
+            container.innerHTML += `
+                <button class="btn btn-outline-light btn-sm w-100" onclick="accessPanel(3)">
+                    🔥 ${config.nomePainel3} <span id="badgeZeus" class="badge-creditos">${config.credZeus || 0}</span>
+                </button>
+            `;
+        }
     }
 
     function showModalCadastro(id = "") {
@@ -704,12 +849,11 @@
         document.getElementById('acoesTitulo').innerText = `👤 ${c.nome}`;
         document.getElementById('acoesSubtitulo').innerText = c.status === 'apagar' ? '⏳ Status: A RECEBER' : '';
         
-        // Resumo das informações no topo do modal
+        // Resumo das informações no topo do modal (OCULTADO: Servidor)
         let infoHtml = `
             <div class="info-item info-full"><span class="info-label">Nome:</span><span class="info-value">${c.nome}</span></div>
             <div class="info-item"><span class="info-label">Usuário:</span><span class="info-value">${c.user || '-'}</span></div>
             <div class="info-item"><span class="info-label">Senha:</span><span class="info-value">${c.pass || '-'}</span></div>
-            <div class="info-item"><span class="info-label">Servidor:</span><span class="info-value">${c.serv || '-'}</span></div>
             <div class="info-item"><span class="info-label">Valor:</span><span class="info-value">R$ ${c.valor.toFixed(2)}</span></div>
             <div class="info-item"><span class="info-label">Painel:</span><span class="info-value">${(c.painel || 'central').toUpperCase()}</span></div>
             <div class="info-item info-full"><span class="info-label">Vencimento:</span><span class="info-value">${formatarDataBR(c.data)}</span></div>
@@ -784,7 +928,7 @@
             else if(statusReal === 'vencer') badgeClass = 'bg-warning text-dark';
             let dataExib = c.data.split('-').reverse().join('/');
             
-            // Card com informações expandidas (nome, usuário, senha, servidor, valor)
+            // Card com informações expandidas (OCULTADO: Servidor)
             listaDiv.innerHTML += `
                 <div class="card-cliente" onclick="abrirAcoesCliente('${c.id}')">
                     <div class="d-flex justify-content-between align-items-start flex-wrap">
@@ -793,7 +937,6 @@
                     <div class="cliente-info">
                         <div class="info-item"><span class="info-label">Usuário:</span><span class="info-value">${c.user || '-'}</span></div>
                         <div class="info-item"><span class="info-label">Senha:</span><span class="info-value">${c.pass || '-'}</span></div>
-                        <div class="info-item"><span class="info-label">Servidor:</span><span class="info-value">${c.serv || '-'}</span></div>
                         <div class="info-item"><span class="info-label">Valor:</span><span class="info-value">R$ ${c.valor.toFixed(2)}</span></div>
                     </div>
                 </div>
@@ -861,7 +1004,7 @@
         let c = clientes.find(i => i.id === id);
         if(c) {
             document.getElementById('editId').value = c.id;            document.getElementById('cNome').value = c.nome; document.getElementById('cUser').value = c.user; document.getElementById('cPass').value = c.pass;
-            document.getElementById('cValor').value = c.valor; document.getElementById('cData').value = c.data; document.getElementById('cServ').value = c.serv;
+            document.getElementById('cValor').value = c.valor; document.getElementById('cData').value = c.data; document.getElementById('cServ').value = c.serv || '';
             document.getElementById('cUrl').value = c.url; document.getElementById('cTel').value = c.tel; document.getElementById('cObs').value = c.obs;
             document.getElementById('cPainel').value = c.painel || 'central';
             new bootstrap.Modal(document.getElementById('modalCadastro')).show();
