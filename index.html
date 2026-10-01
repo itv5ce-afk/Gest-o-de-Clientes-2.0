@@ -819,6 +819,7 @@
     function renderFinanceiro() {
         const mes = document.getElementById('filterMes').value;
         let aReceber = 0;
+        let recebidoMes = 0;
         let totalGeral = 0;
         let totalActive = 0;
         
@@ -828,17 +829,26 @@
                 totalGeral += val;
                 totalActive++;
                 
+                const temPagamentoNoMes = c.ultimoPagamento && c.ultimoPagamento.startsWith(mes);
+                
+                // Se houve pagamento neste mês, soma ao recebido do mês
+                if(temPagamentoNoMes) {
+                    recebidoMes += val;
+                }
+                
+                // Se o vencimento é neste mês e NÃO houve pagamento neste mês, soma ao a receber
                 if(c.data && c.data.startsWith(mes)) {
-                    const temPagamentoNoMes = c.ultimoPagamento && c.ultimoPagamento.startsWith(mes);
                     if(!temPagamentoNoMes) {
                         aReceber += val;
                     }
-                }            }
+                }            
+            }
         });
         
-        const recebido = totalGeral - aReceber;
+        // O valor de recebidoMes começará automaticamente em 0 no dia 1 de cada mês,
+        // pois nenhum cliente terá 'ultimoPagamento' com o novo mês até que um pagamento seja confirmado.
         
-        document.getElementById('finRecebido').innerText = `R$ ${recebido.toFixed(2)}`;
+        document.getElementById('finRecebido').innerText = `R$ ${recebidoMes.toFixed(2)}`;
         document.getElementById('finPendente').innerText = `R$ ${aReceber.toFixed(2)}`;
         document.getElementById('finTotalClientes').innerText = totalActive;
         document.getElementById('finGeral').innerText = `R$ ${totalGeral.toFixed(2)}`;
