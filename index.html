@@ -415,11 +415,11 @@
     <div id="adminPanel" class="mb-4 p-2">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
             <h5 class="m-0"><i class="bi bi-cash-stack text-success"></i> Financeiro</h5>
-            <!-- ALTERADO: de type="month" para type="date" para exibir DD/MM/AAAA -->
-            <input type="date" id="filterData" class="form-control w-auto bg-dark text-white border-secondary" style="max-width: 170px;">
+            <!-- ALTERADO: Voltou para type="month" para exibir MM/AAAA e permitir ciclo mensal -->
+            <input type="month" id="filterMes" class="form-control w-auto bg-dark text-white border-secondary" style="max-width: 170px;">
         </div>
         <div class="row g-2">
-            <div class="col-6 col-md-3"><div class="card-financeiro"><div class="stat-label">Recebido (Dia)</div><div class="stat-val" id="finRecebido">R$ 0,00</div></div></div>
+            <div class="col-6 col-md-3"><div class="card-financeiro"><div class="stat-label">Recebido (Mês)</div><div class="stat-val" id="finRecebido">R$ 0,00</div></div></div>
             <div class="col-6 col-md-3"><div class="card-financeiro" style="border-left-color: #ffc107;"><div class="stat-label">A Receber</div><div class="stat-val text-warning" id="finPendente">R$ 0,00</div></div></div>
             <div class="col-6 col-md-3"><div class="card-financeiro" style="border-left-color: #0dcaf0;"><div class="stat-label">Total Clientes</div><div class="stat-val text-info" id="finTotalClientes">0</div></div></div>
             <div class="col-6 col-md-3"><div class="card-financeiro" style="border-left-color: #00ff00;"><div class="stat-label">Lucro Geral</div><div class="stat-val" id="finGeral" style="color: #00ff00;">R$ 0,00</div></div></div>
@@ -455,7 +455,10 @@
                 <label class="small">Senha:</label><input type="text" id="cPass" class="form-control mb-2">
                 <label class="small">Valor (R$):</label><input type="number" id="cValor" class="form-control mb-2" step="0.01">
                 <label class="small">Data Vencimento:</label><input type="date" id="cData" class="form-control mb-2">
-                <label class="small">Servidor:</label><input type="text" id="cServ" class="form-control mb-2">
+                <!-- OCULTADO: Campo Servidor mantido no HTML para não quebrar o Firebase, mas oculto visualmente -->
+                <div style="display: none;">
+                    <label class="small">Servidor:</label><input type="text" id="cServ" class="form-control mb-2">
+                </div>
                 <label class="small">URL Playlist:</label><input type="text" id="cUrl" class="form-control mb-2">
                 <label class="small">WhatsApp (com DDD):</label><input type="tel" id="cTel" class="form-control mb-2" placeholder="55999999999">
                 <!-- NOVO CAMPO: Painel do cliente -->
@@ -522,8 +525,8 @@
     let currentFilter = 'ativos';
     let usuarioLogadoUid = null;
 
-    // ALTERADO: Inicializa com a data completa de hoje (YYYY-MM-DD)
-    document.getElementById('filterData').value = new Date().toISOString().slice(0, 10);
+    // ALTERADO: Inicializa com o mês/ano atual (YYYY-MM) para o ciclo mensal
+    document.getElementById('filterMes').value = new Date().toISOString().slice(0, 7);
     
     auth.onAuthStateChanged(user => {
         if (user) {
@@ -846,12 +849,11 @@
         document.getElementById('acoesTitulo').innerText = `👤 ${c.nome}`;
         document.getElementById('acoesSubtitulo').innerText = c.status === 'apagar' ? '⏳ Status: A RECEBER' : '';
         
-        // Resumo das informações no topo do modal
+        // Resumo das informações no topo do modal (OCULTADO: Servidor)
         let infoHtml = `
             <div class="info-item info-full"><span class="info-label">Nome:</span><span class="info-value">${c.nome}</span></div>
             <div class="info-item"><span class="info-label">Usuário:</span><span class="info-value">${c.user || '-'}</span></div>
             <div class="info-item"><span class="info-label">Senha:</span><span class="info-value">${c.pass || '-'}</span></div>
-            <div class="info-item"><span class="info-label">Servidor:</span><span class="info-value">${c.serv || '-'}</span></div>
             <div class="info-item"><span class="info-label">Valor:</span><span class="info-value">R$ ${c.valor.toFixed(2)}</span></div>
             <div class="info-item"><span class="info-label">Painel:</span><span class="info-value">${(c.painel || 'central').toUpperCase()}</span></div>
             <div class="info-item info-full"><span class="info-label">Vencimento:</span><span class="info-value">${formatarDataBR(c.data)}</span></div>
@@ -926,7 +928,7 @@
             else if(statusReal === 'vencer') badgeClass = 'bg-warning text-dark';
             let dataExib = c.data.split('-').reverse().join('/');
             
-            // Card com informações expandidas (nome, usuário, senha, servidor, valor)
+            // Card com informações expandidas (OCULTADO: Servidor)
             listaDiv.innerHTML += `
                 <div class="card-cliente" onclick="abrirAcoesCliente('${c.id}')">
                     <div class="d-flex justify-content-between align-items-start flex-wrap">
@@ -935,7 +937,6 @@
                     <div class="cliente-info">
                         <div class="info-item"><span class="info-label">Usuário:</span><span class="info-value">${c.user || '-'}</span></div>
                         <div class="info-item"><span class="info-label">Senha:</span><span class="info-value">${c.pass || '-'}</span></div>
-                        <div class="info-item"><span class="info-label">Servidor:</span><span class="info-value">${c.serv || '-'}</span></div>
                         <div class="info-item"><span class="info-label">Valor:</span><span class="info-value">R$ ${c.valor.toFixed(2)}</span></div>
                     </div>
                 </div>
@@ -962,10 +963,14 @@
         else alert("Telefone não informado.");
     }
     
+    // ALTERADO: Função financeira agora opera em ciclo MENSAL
+    // - "Recebido (Mês)" soma todos os pagamentos confirmados (ultimoPagamento) dentro do mês selecionado
+    // - No dia 1 de cada mês, automaticamente zera, pois nenhum cliente terá pagamento no novo mês
+    // - Inicia novo ciclo somando as renovações/pagamentos até fechar o mês
+    // - A RECEBER = LUCRO GERAL - RECEBIDO (MÊS)
     function renderFinanceiro() {
-        // ALTERADO: Usa a data completa (YYYY-MM-DD) do novo input
-        const dataFiltro = document.getElementById('filterData').value;
-        let recebidoDia = 0;
+        const mesFiltro = document.getElementById('filterMes').value; // formato YYYY-MM
+        let recebidoMes = 0;
         let totalGeral = 0;
         let totalActive = 0;
         
@@ -975,20 +980,20 @@
                 totalGeral += val;
                 totalActive++;
                 
-                // Verifica se o último pagamento começa com a data selecionada (YYYY-MM-DD)
-                const temPagamentoNoDia = c.ultimoPagamento && c.ultimoPagamento.startsWith(dataFiltro);
+                // Verifica se o último pagamento ocorreu no mês selecionado
+                // ultimoPagamento é ISO string (YYYY-MM-DDTHH:mm:ss.sssZ), então startsWith(YYYY-MM) funciona
+                const temPagamentoNoMes = c.ultimoPagamento && c.ultimoPagamento.startsWith(mesFiltro);
                 
-                // Se houve pagamento neste dia, soma ao recebido do dia
-                if(temPagamentoNoDia) {
-                    recebidoDia += val;
+                if(temPagamentoNoMes) {
+                    recebidoMes += val;
                 }
             }
         });
         
-        // A RECEBER = LUCRO GERAL - RECEBIDO (DIA)
-        let aReceber = totalGeral - recebidoDia;
+        // A RECEBER = LUCRO GERAL - RECEBIDO (MÊS)
+        let aReceber = totalGeral - recebidoMes;
         
-        document.getElementById('finRecebido').innerText = `R$ ${recebidoDia.toFixed(2)}`;
+        document.getElementById('finRecebido').innerText = `R$ ${recebidoMes.toFixed(2)}`;
         document.getElementById('finPendente').innerText = `R$ ${aReceber.toFixed(2)}`;
         document.getElementById('finTotalClientes').innerText = totalActive;
         document.getElementById('finGeral').innerText = `R$ ${totalGeral.toFixed(2)}`;
@@ -1003,7 +1008,7 @@
         let c = clientes.find(i => i.id === id);
         if(c) {
             document.getElementById('editId').value = c.id;            document.getElementById('cNome').value = c.nome; document.getElementById('cUser').value = c.user; document.getElementById('cPass').value = c.pass;
-            document.getElementById('cValor').value = c.valor; document.getElementById('cData').value = c.data; document.getElementById('cServ').value = c.serv;
+            document.getElementById('cValor').value = c.valor; document.getElementById('cData').value = c.data; document.getElementById('cServ').value = c.serv || '';
             document.getElementById('cUrl').value = c.url; document.getElementById('cTel').value = c.tel; document.getElementById('cObs').value = c.obs;
             document.getElementById('cPainel').value = c.painel || 'central';
             new bootstrap.Modal(document.getElementById('modalCadastro')).show();
