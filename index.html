@@ -455,10 +455,7 @@
                 <label class="small">Senha:</label><input type="text" id="cPass" class="form-control mb-2">
                 <label class="small">Valor (R$):</label><input type="number" id="cValor" class="form-control mb-2" step="0.01">
                 <label class="small">Data Vencimento:</label><input type="date" id="cData" class="form-control mb-2">
-                <!-- OCULTADO: Campo Servidor mantido no HTML para não quebrar o Firebase, mas oculto visualmente -->
-                <div style="display: none;">
-                    <label class="small">Servidor:</label><input type="text" id="cServ" class="form-control mb-2">
-                </div>
+                <label class="small">Servidor:</label><input type="text" id="cServ" class="form-control mb-2">
                 <label class="small">URL Playlist:</label><input type="text" id="cUrl" class="form-control mb-2">
                 <label class="small">WhatsApp (com DDD):</label><input type="tel" id="cTel" class="form-control mb-2" placeholder="55999999999">
                 <!-- NOVO CAMPO: Painel do cliente -->
@@ -849,11 +846,12 @@
         document.getElementById('acoesTitulo').innerText = `👤 ${c.nome}`;
         document.getElementById('acoesSubtitulo').innerText = c.status === 'apagar' ? '⏳ Status: A RECEBER' : '';
         
-        // Resumo das informações no topo do modal (OCULTADO: Servidor)
+        // Resumo das informações no topo do modal
         let infoHtml = `
             <div class="info-item info-full"><span class="info-label">Nome:</span><span class="info-value">${c.nome}</span></div>
             <div class="info-item"><span class="info-label">Usuário:</span><span class="info-value">${c.user || '-'}</span></div>
             <div class="info-item"><span class="info-label">Senha:</span><span class="info-value">${c.pass || '-'}</span></div>
+            <div class="info-item"><span class="info-label">Servidor:</span><span class="info-value">${c.serv || '-'}</span></div>
             <div class="info-item"><span class="info-label">Valor:</span><span class="info-value">R$ ${c.valor.toFixed(2)}</span></div>
             <div class="info-item"><span class="info-label">Painel:</span><span class="info-value">${(c.painel || 'central').toUpperCase()}</span></div>
             <div class="info-item info-full"><span class="info-label">Vencimento:</span><span class="info-value">${formatarDataBR(c.data)}</span></div>
@@ -928,7 +926,7 @@
             else if(statusReal === 'vencer') badgeClass = 'bg-warning text-dark';
             let dataExib = c.data.split('-').reverse().join('/');
             
-            // Card com informações expandidas (OCULTADO: Servidor)
+            // Card com informações expandidas (nome, usuário, senha, servidor, valor)
             listaDiv.innerHTML += `
                 <div class="card-cliente" onclick="abrirAcoesCliente('${c.id}')">
                     <div class="d-flex justify-content-between align-items-start flex-wrap">
@@ -937,6 +935,7 @@
                     <div class="cliente-info">
                         <div class="info-item"><span class="info-label">Usuário:</span><span class="info-value">${c.user || '-'}</span></div>
                         <div class="info-item"><span class="info-label">Senha:</span><span class="info-value">${c.pass || '-'}</span></div>
+                        <div class="info-item"><span class="info-label">Servidor:</span><span class="info-value">${c.serv || '-'}</span></div>
                         <div class="info-item"><span class="info-label">Valor:</span><span class="info-value">R$ ${c.valor.toFixed(2)}</span></div>
                     </div>
                 </div>
@@ -1004,7 +1003,7 @@
         let c = clientes.find(i => i.id === id);
         if(c) {
             document.getElementById('editId').value = c.id;            document.getElementById('cNome').value = c.nome; document.getElementById('cUser').value = c.user; document.getElementById('cPass').value = c.pass;
-            document.getElementById('cValor').value = c.valor; document.getElementById('cData').value = c.data; document.getElementById('cServ').value = c.serv || '';
+            document.getElementById('cValor').value = c.valor; document.getElementById('cData').value = c.data; document.getElementById('cServ').value = c.serv;
             document.getElementById('cUrl').value = c.url; document.getElementById('cTel').value = c.tel; document.getElementById('cObs').value = c.obs;
             document.getElementById('cPainel').value = c.painel || 'central';
             new bootstrap.Modal(document.getElementById('modalCadastro')).show();
